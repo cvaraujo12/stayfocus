@@ -5,6 +5,7 @@ import { Menu, X, Sun, Moon, HelpCircle } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Sidebar } from './Sidebar'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -74,12 +75,14 @@ export function Header() {
             </button>
 
             {/* Help button */}
-            <button
-              className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Ajuda"
-            >
-              <HelpCircle className="h-5 w-5" aria-hidden="true" />
-            </button>
+            <Link href="/roadmap">
+              <button
+                className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Roadmap e Ajuda"
+              >
+                <HelpCircle className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </Link>
 
             {/* User profile */}
             <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
