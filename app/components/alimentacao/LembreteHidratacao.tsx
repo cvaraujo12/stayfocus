@@ -1,32 +1,17 @@
 'use client'
 
-import { useState } from 'react'
 import { Droplet, PlusCircle, MinusCircle } from 'lucide-react'
+import { useAlimentacaoStore } from '@/app/stores/alimentacaoStore'
 
 export function LembreteHidratacao() {
-  const [coposBebidos, setCoposBebidos] = useState(0)
-  const [metaDiaria, setMetaDiaria] = useState(8)
-  const [ultimoRegistro, setUltimoRegistro] = useState<string | null>(null)
-
-  const adicionarCopo = () => {
-    if (coposBebidos < metaDiaria) {
-      setCoposBebidos(coposBebidos + 1)
-      setUltimoRegistro(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-    }
-  }
-
-  const removerCopo = () => {
-    if (coposBebidos > 0) {
-      setCoposBebidos(coposBebidos - 1)
-    }
-  }
-
-  const ajustarMeta = (valor: number) => {
-    const novaMeta = metaDiaria + valor
-    if (novaMeta >= 1 && novaMeta <= 15) {
-      setMetaDiaria(novaMeta)
-    }
-  }
+  const { 
+    coposBebidos, 
+    metaDiaria, 
+    ultimoRegistro, 
+    adicionarCopo, 
+    removerCopo, 
+    ajustarMeta 
+  } = useAlimentacaoStore()
 
   // Calcular a porcentagem de progresso
   const progresso = Math.min((coposBebidos / metaDiaria) * 100, 100)

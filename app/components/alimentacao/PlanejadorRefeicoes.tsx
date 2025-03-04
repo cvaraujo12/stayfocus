@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Clock, Plus, Save, Trash2 } from 'lucide-react'
+import { useAlimentacaoStore } from '@/app/stores/alimentacaoStore'
 
 type Refeicao = {
   id: string
@@ -10,48 +11,26 @@ type Refeicao = {
 }
 
 export function PlanejadorRefeicoes() {
-  const [refeicoes, setRefeicoes] = useState<Refeicao[]>([
-    { id: '1', horario: '07:30', descricao: 'Café da manhã' },
-    { id: '2', horario: '12:00', descricao: 'Almoço' },
-    { id: '3', horario: '16:00', descricao: 'Lanche da tarde' },
-    { id: '4', horario: '19:30', descricao: 'Jantar' },
-  ])
+  const { refeicoes, adicionarRefeicao, atualizarRefeicao, removerRefeicao } = useAlimentacaoStore()
   const [novaRefeicao, setNovaRefeicao] = useState({ horario: '', descricao: '' })
   const [editando, setEditando] = useState<string | null>(null)
 
-  const adicionarRefeicao = () => {
+  const handleAdicionarRefeicao = () => {
     if (!novaRefeicao.horario || !novaRefeicao.descricao) return
 
-    setRefeicoes([
-      ...refeicoes,
-      {
-        id: Date.now().toString(),
-        horario: novaRefeicao.horario,
-        descricao: novaRefeicao.descricao,
-      },
-    ])
+    adicionarRefeicao(novaRefeicao.horario, novaRefeicao.descricao)
     setNovaRefeicao({ horario: '', descricao: '' })
   }
 
-  const removerRefeicao = (id: string) => {
-    setRefeicoes(refeicoes.filter((refeicao) => refeicao.id !== id))
-  }
-
-  const iniciarEdicao = (refeicao: Refeicao) => {
-    setEditando(refeicao.id)
-    setNovaRefeicao({ horario: refeicao.horario, descricao: refeicao.descricao })
+  const iniciarEdicao = (id: string, horario: string, descricao: string) => {
+    setEditando(id)
+    setNovaRefeicao({ horario, descricao })
   }
 
   const salvarEdicao = () => {
     if (!editando || !novaRefeicao.horario || !novaRefeicao.descricao) return
 
-    setRefeicoes(
-      refeicoes.map((refeicao) =>
-        refeicao.id === editando
-          ? { ...refeicao, horario: novaRefeicao.horario, descricao: novaRefeicao.descricao }
-          : refeicao
-      )
-    )
+    atualizarRefeicao(editando, novaRefeicao.horario, novaRefeicao.descricao)
     setEditando(null)
     setNovaRefeicao({ horario: '', descricao: '' })
   }
@@ -112,7 +91,7 @@ export function PlanejadorRefeicoes() {
                   {refeicao.descricao}
                 </span>
                 <button
-                  onClick={() => iniciarEdicao(refeicao)}
+                  onClick={() => iniciarEdicao(refeicao.id, refeicao.horario, refeicao.descricao)}
                   className="ml-2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                   aria-label="Editar refeição"
                 >
@@ -152,7 +131,7 @@ export function PlanejadorRefeicoes() {
             placeholder="Descrição da refeição"
           />
           <button
-            onClick={adicionarRefeicao}
+            onClick={handleAdicionarRefeicao}
             disabled={!novaRefeicao.horario || !novaRefeicao.descricao}
             className="w-full sm:w-auto px-4 py-2 bg-alimentacao-primary text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >

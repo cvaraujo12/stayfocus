@@ -2,15 +2,7 @@
 
 import { useState } from 'react'
 import { Camera, Plus, X } from 'lucide-react'
-
-type RegistroRefeicao = {
-  id: string
-  data: string
-  horario: string
-  descricao: string
-  tipoIcone: string | null
-  foto: string | null
-}
+import { useAlimentacaoStore } from '@/app/stores/alimentacaoStore'
 
 // Ícones simples para tipos de refeição
 const tiposRefeicao = [
@@ -24,16 +16,7 @@ const tiposRefeicao = [
 ]
 
 export function RegistroRefeicoes() {
-  const [registros, setRegistros] = useState<RegistroRefeicao[]>([
-    {
-      id: '1',
-      data: '2025-03-03',
-      horario: '08:30',
-      descricao: 'Café da manhã',
-      tipoIcone: 'cafe',
-      foto: null,
-    },
-  ])
+  const { registros, adicionarRegistro, removerRegistro } = useAlimentacaoStore()
   const [novoRegistro, setNovoRegistro] = useState({
     horario: '',
     descricao: '',
@@ -42,22 +25,15 @@ export function RegistroRefeicoes() {
   })
   const [mostrarForm, setMostrarForm] = useState(false)
 
-  const adicionarRegistro = () => {
+  const handleAdicionarRegistro = () => {
     if (!novoRegistro.horario || !novoRegistro.descricao) return
-
-    const hoje = new Date().toISOString().split('T')[0]
     
-    setRegistros([
-      ...registros,
-      {
-        id: Date.now().toString(),
-        data: hoje,
-        horario: novoRegistro.horario,
-        descricao: novoRegistro.descricao,
-        tipoIcone: novoRegistro.tipoIcone,
-        foto: novoRegistro.foto,
-      },
-    ])
+    adicionarRegistro(
+      novoRegistro.horario,
+      novoRegistro.descricao,
+      novoRegistro.tipoIcone,
+      novoRegistro.foto
+    )
     
     setNovoRegistro({
       horario: '',
@@ -67,10 +43,6 @@ export function RegistroRefeicoes() {
     })
     
     setMostrarForm(false)
-  }
-
-  const removerRegistro = (id: string) => {
-    setRegistros(registros.filter((registro) => registro.id !== id))
   }
 
   const selecionarTipoIcone = (tipo: string) => {
@@ -227,7 +199,7 @@ export function RegistroRefeicoes() {
             
             <div className="flex justify-end">
               <button
-                onClick={adicionarRegistro}
+                onClick={handleAdicionarRegistro}
                 disabled={!novoRegistro.horario || !novoRegistro.descricao}
                 className="px-4 py-2 bg-alimentacao-primary text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Salvar registro"
