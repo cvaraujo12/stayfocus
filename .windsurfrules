@@ -1,0 +1,64 @@
+{
+  "rules": [
+    {
+      "name": "Simplicidade e Foco",
+      "description": "Priorize a simplicidade e o foco nas funcionalidades essenciais para neurodivergentes. Evite complexidades desnecessárias."
+    },
+    {
+      "name": "Estrutura Clara",
+      "description": "Mantenha uma estrutura de código clara e previsível, seguindo os princípios de 'Convenção sobre Configuração'."
+    },
+    {
+      "name": "Componentes Atômicos",
+      "description": "Desenvolva componentes pequenos e reutilizáveis com propósito único, facilitando a manutenção e compreensão do código."
+    },
+    {
+      "name": "Acessibilidade Integrada",
+      "description": "Implemente ARIA labels e suporte a navegação por teclado desde o início do desenvolvimento."
+    },
+    {
+      "name": "Feedback Visual Rápido",
+      "description": "Garanta que todas as ações do usuário tenham retorno visual imediato para melhorar a experiência de uso."
+    },
+    {
+      "name": "Consistência Visual",
+      "description": "Utilize um sistema de design simplificado com tokens claros para manter a consistência visual em toda a aplicação."
+    },
+    {
+      "name": "Gerenciamento de Estado Simplificado",
+      "description": "Use Zustand para gerenciamento de estado, mantendo a API simples e reduzindo boilerplate."
+    },
+    {
+      "name": "Armazenamento Local",
+      "description": "Implemente persistência local usando localStorage via middleware do Zustand."
+    },
+    {
+      "name": "Estruturas de Dados Simples",
+      "description": "Utilize JSON simples e estruturas de dados planas sempre que possível para facilitar o gerenciamento de dados."
+    },
+    {
+      "name": "Estilização Consistente",
+      "description": "Aplique Tailwind CSS para estilização, mantendo a consistência e reduzindo decisões de design."
+    },
+    {
+      "name": "Ícones Minimalistas",
+      "description": "Utilize Lucide ou Phosphor Icons para manter um conjunto de ícones consistente e minimalista."
+    },
+    {
+      "name": "Desenvolvimento Gradual",
+      "description": "Inicie com mockups estáticos e adicione interatividade gradualmente, seguindo a ordem de implementação priorizada."
+    },
+    {
+      "name": "Documentação Concisa",
+      "description": "Mantenha documentação inline com comentários sucintos e claros para facilitar a compreensão do código."
+    },
+    {
+      "name": "Testes de Usabilidade",
+      "description": "Realize testes frequentes com usuários neurodivergentes para garantir que a interface atenda às suas necessidades específicas."
+    },
+    {
+      "name": "Otimização de Performance",
+      "description": "Priorize a performance da aplicação, evitando animações pesadas ou processamentos complexos que possam causar atrasos."
+    }
+  ]
+}

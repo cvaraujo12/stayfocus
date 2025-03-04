@@ -1,0 +1,129 @@
+# 🎯 Painel de Produtividade para Neurodivergentes - Versão Simplificada (MVP)
+
+## 📋 Visão Geral
+
+Este documento descreve uma versão simplificada (MVP) do painel de produtividade focado em pessoas neurodivergentes, especialmente com TDAH. O objetivo é criar uma experiência focada nas necessidades específicas deste público com apenas as funcionalidades essenciais.
+
+## 🔑 Princípios Orientadores
+
+1. **Simplicidade Acima de Tudo**: Menos é mais.
+2. **Foco no Essencial**: Apenas funcionalidades que agregam valor imediato.
+3. **Redução de Sobrecarga Cognitiva**: Interfaces claras e previsíveis.
+4. **Estímulos Visuais Adequados**: Uso estratégico de cores e ícones.
+5. **Lembretes e Estrutura**: Apoio para funções executivas.
+
+## 📱 Layout e Estrutura
+
+### Estrutura de Páginas
+- **Início**: Dashboard com visão geral e lembretes
+- **Alimentação**: Controle e planejamento de refeições
+- **Estudos**: Organização e técnicas de aprendizado
+- **Saúde**: Monitoramento de bem-estar e medicações
+- **Lazer**: Atividades recreativas e descanso
+
+### Navegação
+- Menu lateral com ícones grandes e coloridos
+- Barra superior minimalista com apenas:
+  - Nome do usuário/perfil
+  - Alternador de tema claro/escuro
+  - Botão de ajuda rápida
+
+## ⚙️ Funcionalidades por Seção
+
+### 1. Início
+- **Painel Visual do Dia**: Exibição em blocos de tempo com códigos de cores
+- **Lembretes de Pausas**: Alertas suaves para alternar tarefas a cada 25-30 minutos
+- **Lista de Prioridades**: Máximo de 3 tarefas principais destacadas para o dia
+
+### 2. Alimentação
+- **Planejador de Refeições**: Template simples com opções de horários e lembrete
+- **Registro Visual**: Fotos simples de refeições ou seleção de ícones (sem contagem calórica)
+- **Lembretes de Hidratação**: Acompanhamento simplificado de ingestão de água
+
+### 3. Estudos
+- **Temporizador Pomodoro Adaptado**: Sessões customizáveis (15-25 min) com intervalos claros
+- **Organizador de Materiais**: Lista visual de recursos de estudo com progresso visual
+- **Notas de Estudo Estruturadas**: Templates com sugestões para diferentes tipos de estudo
+
+### 4. Saúde
+- **Rastreador de Medicação**: Sistema de lembretes simples (sim/não) para medicações
+- **Monitor de Humor**: Check-in visual diário (3-5 opções, sem texto extenso)
+- **Lembretes de Movimento**: Sugestões periódicas para alongamentos ou caminhadas curtas
+
+### 5. Lazer
+- **Banco de Atividades**: Lista de opções de lazer para momentos de dificuldade de escolha
+- **Temporizador de Descompressão**: Ferramenta para sinalizar início/fim de descanso
+- **Limitador de Tempo**: Ajuda para evitar hiperfoco em atividades recreativas
+
+## 🎨 Design e UI
+
+### Cores
+- Esquema de cores consistente para cada seção
+- Alto contraste para melhor legibilidade
+- Opção de modo reduzido de estimulação visual
+
+### Componentes
+- Botões grandes com ícones e texto
+- Cards simples com bordas coloridas por categoria
+- Feedback visual e sonoro para ações completas
+
+## 📊 Dados e Armazenamento
+
+- Armazenamento local (localStorage) para MVP
+- Estruturas de dados simples e independentes para cada módulo
+- Opção para exportar dados em formato de texto simples
+
+## ⏱️ Implementação Priorizada
+
+1. **Semana 1**: Estrutura básica e navegação
+2. **Semana 2**: Módulos Início e Alimentação
+3. **Semana 3**: Módulos Estudos e Saúde
+4. **Semana 4**: Módulo Lazer e integração
+
+## 🚫 O que NÃO incluir
+
+- Análises complexas ou gráficos detalhados
+- Integrações com múltiplas plataformas
+- Notificações invasivas ou frequentes
+- Recursos que exigem múltiplos cliques/etapas
+- Textos longos ou instruções complexas
+
+## 💡 Estratégias Específicas para Neurodivergentes
+
+- **Redução de Estímulos**: Opção para desativar animações e reduzir cores
+- **Consistência**: Mesma estrutura e padrões em todos os módulos
+- **Previsibilidade**: Sequências claras de ações com resultado visível
+- **Microtarefas**: Divisão clara de atividades em passos muito pequenos
+- **Recompensa Visual**: Animações sutis e positivas para tarefas concluídas
+
+## 🛠️ Stack Tecnológica Recomendada
+
+### Frontend
+- **Framework**: Next.js (App Router) - estrutura previsível e simples
+- **Estilização**: Tailwind CSS - reduz decisões de design e mantém consistência
+- **Componentes**: Headless UI - acessibilidade embutida, menos código para gerenciar
+- **Ícones**: Lucide ou Phosphor Icons - conjunto consistente e minimalista
+
+### Estado e Armazenamento
+- **Gerenciamento de Estado**: Zustand - API simples, menos boilerplate que Redux
+- **Persistência Local**: localStorage via Zustand middleware
+- **Formato de Dados**: JSON simples, estruturas planas sempre que possível
+
+### Ferramentas de Desenvolvimento
+- **Linting**: ESLint com configurações mínimas necessárias
+- **Formatação**: Prettier com configuração padrão
+
+### Princípios de Implementação
+- **Convenção sobre Configuração**: Usar padrões estabelecidos
+- **Components Atômicos**: Componentes pequenos e reutilizáveis com propósito único
+- **Consistência Visual**: Sistema de design simplificado com tokens claros
+- **Feedback Imediato**: Retorno visual rápido para ações do usuário
+- **Acessibilidade**: ARIA labels e suporte a navegação por teclado integrados desde o início
+
+### Abordagem de Desenvolvimento
+- Começar com mockups estáticos e adicionar interatividade gradualmente
+- Documentação inline com comentários sucintos e claros
+
+
+
+

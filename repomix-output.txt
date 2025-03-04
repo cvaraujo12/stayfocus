@@ -1,0 +1,3683 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+app/
+  alimentacao/
+    page.tsx
+  components/
+    alimentacao/
+      LembreteHidratacao.tsx
+      PlanejadorRefeicoes.tsx
+      RegistroRefeicoes.tsx
+    estudos/
+      RegistroEstudos.tsx
+      TemporizadorPomodoro.tsx
+    inicio/
+      LembretePausas.tsx
+      ListaPrioridades.tsx
+      PainelDia.tsx
+    layout/
+      Header.tsx
+      Sidebar.tsx
+    saude/
+      MonitoramentoHumor.tsx
+      RegistroMedicamentos.tsx
+    ui/
+      Card.tsx
+    ThemeProvider.tsx
+  estudos/
+    page.tsx
+  saude/
+    page.tsx
+  store/
+    index.ts
+  types/
+    index.ts
+  globals.css
+  layout.tsx
+  page.tsx
+  providers.tsx
+.windsurfrules
+mvp.txt
+next-env.d.ts
+package.json
+postcss.config.js
+README.md
+start.sh
+tailwind.config.js
+tsconfig.json
+
+================================================================
+Files
+================================================================
+
+================
+File: app/alimentacao/page.tsx
+================
+import { Card } from '@/app/components/ui/Card'
+import { PlanejadorRefeicoes } from '@/app/components/alimentacao/PlanejadorRefeicoes'
+import { RegistroRefeicoes } from '@/app/components/alimentacao/RegistroRefeicoes'
+import { LembreteHidratacao } from '@/app/components/alimentacao/LembreteHidratacao'
+
+export default function AlimentacaoPage() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alimentação</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Planejador de Refeições */}
+        <Card title="Planejador de Refeições">
+          <PlanejadorRefeicoes />
+        </Card>
+        
+        {/* Registro Visual de Refeições */}
+        <Card title="Registro de Refeições">
+          <RegistroRefeicoes />
+        </Card>
+      </div>
+      
+      {/* Lembretes de Hidratação */}
+      <Card title="Hidratação">
+        <LembreteHidratacao />
+      </Card>
+    </div>
+  )
+}
+
+================
+File: app/components/alimentacao/LembreteHidratacao.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { Droplet, PlusCircle, MinusCircle } from 'lucide-react'
+
+export function LembreteHidratacao() {
+  const [coposBebidos, setCoposBebidos] = useState(0)
+  const [metaDiaria, setMetaDiaria] = useState(8)
+  const [ultimoRegistro, setUltimoRegistro] = useState<string | null>(null)
+
+  const adicionarCopo = () => {
+    if (coposBebidos < metaDiaria) {
+      setCoposBebidos(coposBebidos + 1)
+      setUltimoRegistro(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    }
+  }
+
+  const removerCopo = () => {
+    if (coposBebidos > 0) {
+      setCoposBebidos(coposBebidos - 1)
+    }
+  }
+
+  const ajustarMeta = (valor: number) => {
+    const novaMeta = metaDiaria + valor
+    if (novaMeta >= 1 && novaMeta <= 15) {
+      setMetaDiaria(novaMeta)
+    }
+  }
+
+  // Calcular a porcentagem de progresso
+  const progresso = Math.min((coposBebidos / metaDiaria) * 100, 100)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div className="mb-4 md:mb-0">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+            Acompanhamento de Hidratação
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Registre os copos de água que você bebe durante o dia
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => ajustarMeta(-1)}
+            className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Diminuir meta diária"
+            disabled={metaDiaria <= 1}
+          >
+            <MinusCircle className="h-6 w-6" />
+          </button>
+          
+          <div className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+              Meta: {metaDiaria} copos
+            </span>
+          </div>
+          
+          <button
+            onClick={() => ajustarMeta(1)}
+            className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Aumentar meta diária"
+            disabled={metaDiaria >= 15}
+          >
+            <PlusCircle className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+
+      {/* Barra de progresso */}
+      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+        <div
+          className="bg-blue-500 h-full transition-all duration-500 ease-out"
+          style={{ width: `${progresso}%` }}
+          role="progressbar"
+          aria-valuenow={coposBebidos}
+          aria-valuemin={0}
+          aria-valuemax={metaDiaria}
+        ></div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {coposBebidos} de {metaDiaria} copos
+          {ultimoRegistro && (
+            <span className="ml-2">
+              (Último: {ultimoRegistro})
+            </span>
+          )}
+        </div>
+        
+        <div className="text-blue-600 dark:text-blue-400">
+          {progresso.toFixed(0)}%
+        </div>
+      </div>
+
+      {/* Visualização dos copos */}
+      <div className="flex flex-wrap gap-2 my-4 justify-center">
+        {Array.from({ length: metaDiaria }).map((_, index) => (
+          <div
+            key={index}
+            className={`w-12 h-16 flex items-center justify-center rounded-b-lg border border-t-0 ${
+              index < coposBebidos
+                ? 'bg-blue-100 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700'
+                : 'bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-700'
+            }`}
+            aria-label={index < coposBebidos ? 'Copo bebido' : 'Copo não bebido'}
+          >
+            <Droplet
+              className={`h-8 w-8 ${
+                index < coposBebidos
+                  ? 'text-blue-500 dark:text-blue-400'
+                  : 'text-gray-400 dark:text-gray-600'
+              }`}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Botões de ação */}
+      <div className="flex justify-center space-x-4">
+        <button
+          onClick={adicionarCopo}
+          disabled={coposBebidos >= metaDiaria}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Registrar um copo de água"
+        >
+          Registrar Copo
+        </button>
+        
+        <button
+          onClick={removerCopo}
+          disabled={coposBebidos <= 0}
+          className="px-4 py-2 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Remover um copo de água"
+        >
+          Remover Copo
+        </button>
+      </div>
+
+      {/* Dicas */}
+      <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-800 dark:text-blue-300">
+        <h4 className="font-medium mb-1">Dicas de Hidratação:</h4>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Mantenha uma garrafa de água sempre visível</li>
+          <li>Beba um copo ao acordar e antes de cada refeição</li>
+          <li>Configure lembretes no celular a cada 1-2 horas</li>
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/components/alimentacao/PlanejadorRefeicoes.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { Clock, Plus, Save, Trash2 } from 'lucide-react'
+
+type Refeicao = {
+  id: string
+  horario: string
+  descricao: string
+}
+
+export function PlanejadorRefeicoes() {
+  const [refeicoes, setRefeicoes] = useState<Refeicao[]>([
+    { id: '1', horario: '07:30', descricao: 'Café da manhã' },
+    { id: '2', horario: '12:00', descricao: 'Almoço' },
+    { id: '3', horario: '16:00', descricao: 'Lanche da tarde' },
+    { id: '4', horario: '19:30', descricao: 'Jantar' },
+  ])
+  const [novaRefeicao, setNovaRefeicao] = useState({ horario: '', descricao: '' })
+  const [editando, setEditando] = useState<string | null>(null)
+
+  const adicionarRefeicao = () => {
+    if (!novaRefeicao.horario || !novaRefeicao.descricao) return
+
+    setRefeicoes([
+      ...refeicoes,
+      {
+        id: Date.now().toString(),
+        horario: novaRefeicao.horario,
+        descricao: novaRefeicao.descricao,
+      },
+    ])
+    setNovaRefeicao({ horario: '', descricao: '' })
+  }
+
+  const removerRefeicao = (id: string) => {
+    setRefeicoes(refeicoes.filter((refeicao) => refeicao.id !== id))
+  }
+
+  const iniciarEdicao = (refeicao: Refeicao) => {
+    setEditando(refeicao.id)
+    setNovaRefeicao({ horario: refeicao.horario, descricao: refeicao.descricao })
+  }
+
+  const salvarEdicao = () => {
+    if (!editando || !novaRefeicao.horario || !novaRefeicao.descricao) return
+
+    setRefeicoes(
+      refeicoes.map((refeicao) =>
+        refeicao.id === editando
+          ? { ...refeicao, horario: novaRefeicao.horario, descricao: novaRefeicao.descricao }
+          : refeicao
+      )
+    )
+    setEditando(null)
+    setNovaRefeicao({ horario: '', descricao: '' })
+  }
+
+  const cancelarEdicao = () => {
+    setEditando(null)
+    setNovaRefeicao({ horario: '', descricao: '' })
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        {refeicoes.map((refeicao) => (
+          <div
+            key={refeicao.id}
+            className="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex items-center text-alimentacao-primary mr-3">
+              <Clock className="h-5 w-5" />
+            </div>
+            
+            {editando === refeicao.id ? (
+              <>
+                <input
+                  type="time"
+                  value={novaRefeicao.horario}
+                  onChange={(e) => setNovaRefeicao({ ...novaRefeicao, horario: e.target.value })}
+                  className="w-24 px-2 py-1 mr-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"
+                />
+                <input
+                  type="text"
+                  value={novaRefeicao.descricao}
+                  onChange={(e) => setNovaRefeicao({ ...novaRefeicao, descricao: e.target.value })}
+                  className="flex-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"
+                  placeholder="Descrição da refeição"
+                />
+                <button
+                  onClick={salvarEdicao}
+                  className="ml-2 p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                  aria-label="Salvar edição"
+                >
+                  <Save className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={cancelarEdicao}
+                  className="ml-1 p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  aria-label="Cancelar edição"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="font-medium text-gray-700 dark:text-gray-300 w-16">
+                  {refeicao.horario}
+                </span>
+                <span className="flex-1 text-gray-900 dark:text-white">
+                  {refeicao.descricao}
+                </span>
+                <button
+                  onClick={() => iniciarEdicao(refeicao)}
+                  className="ml-2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  aria-label="Editar refeição"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => removerRefeicao(refeicao.id)}
+                  className="ml-1 p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  aria-label="Remover refeição"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Adicionar Nova Refeição
+        </h3>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <input
+            type="time"
+            value={novaRefeicao.horario}
+            onChange={(e) => setNovaRefeicao({ ...novaRefeicao, horario: e.target.value })}
+            className="w-full sm:w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+          />
+          <input
+            type="text"
+            value={novaRefeicao.descricao}
+            onChange={(e) => setNovaRefeicao({ ...novaRefeicao, descricao: e.target.value })}
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            placeholder="Descrição da refeição"
+          />
+          <button
+            onClick={adicionarRefeicao}
+            disabled={!novaRefeicao.horario || !novaRefeicao.descricao}
+            className="w-full sm:w-auto px-4 py-2 bg-alimentacao-primary text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="h-5 w-5 inline mr-1" />
+            Adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/components/alimentacao/RegistroRefeicoes.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { Camera, Plus, X } from 'lucide-react'
+
+type RegistroRefeicao = {
+  id: string
+  data: string
+  horario: string
+  descricao: string
+  tipoIcone: string | null
+  foto: string | null
+}
+
+// Ícones simples para tipos de refeição
+const tiposRefeicao = [
+  { id: 'cafe', emoji: '☕', nome: 'Café' },
+  { id: 'fruta', emoji: '🍎', nome: 'Fruta' },
+  { id: 'salada', emoji: '🥗', nome: 'Salada' },
+  { id: 'proteina', emoji: '🍗', nome: 'Proteína' },
+  { id: 'carboidrato', emoji: '🍚', nome: 'Carboidrato' },
+  { id: 'sobremesa', emoji: '🍰', nome: 'Sobremesa' },
+  { id: 'agua', emoji: '💧', nome: 'Água' },
+]
+
+export function RegistroRefeicoes() {
+  const [registros, setRegistros] = useState<RegistroRefeicao[]>([
+    {
+      id: '1',
+      data: '2025-03-03',
+      horario: '08:30',
+      descricao: 'Café da manhã',
+      tipoIcone: 'cafe',
+      foto: null,
+    },
+  ])
+  const [novoRegistro, setNovoRegistro] = useState({
+    horario: '',
+    descricao: '',
+    tipoIcone: null as string | null,
+    foto: null as string | null,
+  })
+  const [mostrarForm, setMostrarForm] = useState(false)
+
+  const adicionarRegistro = () => {
+    if (!novoRegistro.horario || !novoRegistro.descricao) return
+
+    const hoje = new Date().toISOString().split('T')[0]
+    
+    setRegistros([
+      ...registros,
+      {
+        id: Date.now().toString(),
+        data: hoje,
+        horario: novoRegistro.horario,
+        descricao: novoRegistro.descricao,
+        tipoIcone: novoRegistro.tipoIcone,
+        foto: novoRegistro.foto,
+      },
+    ])
+    
+    setNovoRegistro({
+      horario: '',
+      descricao: '',
+      tipoIcone: null,
+      foto: null,
+    })
+    
+    setMostrarForm(false)
+  }
+
+  const removerRegistro = (id: string) => {
+    setRegistros(registros.filter((registro) => registro.id !== id))
+  }
+
+  const selecionarTipoIcone = (tipo: string) => {
+    setNovoRegistro({
+      ...novoRegistro,
+      tipoIcone: novoRegistro.tipoIcone === tipo ? null : tipo,
+    })
+  }
+
+  // Função simplificada para simular upload de foto
+  const simularUploadFoto = () => {
+    // Em um app real, aqui seria integrado com a câmera ou upload
+    const fotoSimulada = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTQ5NDk0Ij5Gb3RvIGRhIHJlZmVpw6fDo288L3RleHQ+PC9zdmc+'
+    setNovoRegistro({
+      ...novoRegistro,
+      foto: fotoSimulada,
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-3">
+        {registros.map((registro) => (
+          <div
+            key={registro.id}
+            className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center mb-2">
+                  <span className="font-medium text-gray-700 dark:text-gray-300 mr-2">
+                    {registro.horario}
+                  </span>
+                  <span className="text-gray-900 dark:text-white font-medium">
+                    {registro.descricao}
+                  </span>
+                </div>
+                
+                {registro.tipoIcone && (
+                  <div className="mb-2">
+                    <span className="text-2xl" aria-label={`Tipo: ${tiposRefeicao.find(t => t.id === registro.tipoIcone)?.nome || ''}`}>
+                      {tiposRefeicao.find(t => t.id === registro.tipoIcone)?.emoji}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <button
+                onClick={() => removerRegistro(registro.id)}
+                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                aria-label="Remover registro"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            {registro.foto && (
+              <div className="mt-2">
+                <img
+                  src={registro.foto}
+                  alt="Foto da refeição"
+                  className="w-full h-32 object-cover rounded-md"
+                />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {mostrarForm ? (
+        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Novo Registro
+            </h3>
+            <button
+              onClick={() => setMostrarForm(false)}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              aria-label="Fechar formulário"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+              <input
+                type="time"
+                value={novoRegistro.horario}
+                onChange={(e) => setNovoRegistro({ ...novoRegistro, horario: e.target.value })}
+                className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                aria-label="Horário da refeição"
+              />
+              <input
+                type="text"
+                value={novoRegistro.descricao}
+                onChange={(e) => setNovoRegistro({ ...novoRegistro, descricao: e.target.value })}
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                placeholder="Descrição da refeição"
+                aria-label="Descrição da refeição"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Tipo de Refeição
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {tiposRefeicao.map((tipo) => (
+                  <button
+                    key={tipo.id}
+                    onClick={() => selecionarTipoIcone(tipo.id)}
+                    className={`w-10 h-10 flex items-center justify-center text-xl rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                      novoRegistro.tipoIcone === tipo.id
+                        ? 'bg-alimentacao-light border-2 border-alimentacao-primary'
+                        : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                    }`}
+                    aria-label={tipo.nome}
+                    aria-pressed={novoRegistro.tipoIcone === tipo.id}
+                  >
+                    {tipo.emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <button
+                onClick={simularUploadFoto}
+                className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                aria-label="Adicionar foto da refeição"
+              >
+                <Camera className="h-5 w-5 mr-2" />
+                <span>Adicionar Foto</span>
+              </button>
+              
+              {novoRegistro.foto && (
+                <div className="mt-2 relative">
+                  <img
+                    src={novoRegistro.foto}
+                    alt="Prévia da foto"
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                  <button
+                    onClick={() => setNovoRegistro({ ...novoRegistro, foto: null })}
+                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                    aria-label="Remover foto"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                onClick={adicionarRegistro}
+                disabled={!novoRegistro.horario || !novoRegistro.descricao}
+                className="px-4 py-2 bg-alimentacao-primary text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Salvar registro"
+              >
+                Salvar Registro
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setMostrarForm(true)}
+          className="w-full py-2 flex items-center justify-center bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+          aria-label="Adicionar novo registro de refeição"
+        >
+          <Plus className="h-5 w-5 mr-1" />
+          <span>Adicionar Registro</span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+================
+File: app/components/estudos/RegistroEstudos.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { BookOpen, Plus, X, Edit, Trash, Check, Clock } from 'lucide-react'
+
+type SessaoEstudo = {
+  id: string
+  titulo: string
+  descricao: string
+  duracao: number // em minutos
+  data: string
+  completo: boolean
+}
+
+export function RegistroEstudos() {
+  const [sessoes, setSessoes] = useState<SessaoEstudo[]>([
+    {
+      id: '1',
+      titulo: 'Matemática - Álgebra Linear',
+      descricao: 'Revisão de matrizes e determinantes',
+      duracao: 45,
+      data: '2023-03-03',
+      completo: true,
+    },
+    {
+      id: '2',
+      titulo: 'Inglês - Vocabulário',
+      descricao: 'Praticar vocabulário técnico',
+      duracao: 30,
+      data: '2023-03-04',
+      completo: false,
+    },
+  ])
+  
+  const [novaSessao, setNovaSessao] = useState({
+    titulo: '',
+    descricao: '',
+    duracao: 30,
+  })
+  
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [mostrarForm, setMostrarForm] = useState(false)
+
+  const adicionarSessao = () => {
+    if (!novaSessao.titulo) return
+
+    const hoje = new Date().toISOString().split('T')[0]
+    
+    setSessoes([
+      ...sessoes,
+      {
+        id: Date.now().toString(),
+        titulo: novaSessao.titulo,
+        descricao: novaSessao.descricao,
+        duracao: novaSessao.duracao,
+        data: hoje,
+        completo: false,
+      },
+    ])
+    
+    setNovaSessao({
+      titulo: '',
+      descricao: '',
+      duracao: 30,
+    })
+    
+    setMostrarForm(false)
+  }
+
+  const removerSessao = (id: string) => {
+    setSessoes(sessoes.filter((sessao) => sessao.id !== id))
+  }
+
+  const alternarCompletar = (id: string) => {
+    setSessoes(
+      sessoes.map((sessao) =>
+        sessao.id === id ? { ...sessao, completo: !sessao.completo } : sessao
+      )
+    )
+  }
+
+  const iniciarEdicao = (sessao: SessaoEstudo) => {
+    setEditandoId(sessao.id)
+    setNovaSessao({
+      titulo: sessao.titulo,
+      descricao: sessao.descricao,
+      duracao: sessao.duracao,
+    })
+    setMostrarForm(true)
+  }
+
+  const salvarEdicao = () => {
+    if (!editandoId || !novaSessao.titulo) return
+
+    setSessoes(
+      sessoes.map((sessao) =>
+        sessao.id === editandoId
+          ? {
+              ...sessao,
+              titulo: novaSessao.titulo,
+              descricao: novaSessao.descricao,
+              duracao: novaSessao.duracao,
+            }
+          : sessao
+      )
+    )
+    
+    setNovaSessao({
+      titulo: '',
+      descricao: '',
+      duracao: 30,
+    })
+    
+    setEditandoId(null)
+    setMostrarForm(false)
+  }
+
+  const cancelarForm = () => {
+    setNovaSessao({
+      titulo: '',
+      descricao: '',
+      duracao: 30,
+    })
+    setEditandoId(null)
+    setMostrarForm(false)
+  }
+
+  // Calcular estatísticas
+  const sessoesCompletas = sessoes.filter((s) => s.completo).length
+  const totalMinutos = sessoes.reduce((total, s) => total + (s.completo ? s.duracao : 0), 0)
+  const totalHoras = Math.floor(totalMinutos / 60)
+  const minutosRestantes = totalMinutos % 60
+
+  return (
+    <div className="space-y-4">
+      {/* Estatísticas */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="p-4 bg-estudos-light dark:bg-estudos-dark/20 rounded-lg">
+          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            Sessões Completas
+          </h4>
+          <div className="flex items-center">
+            <Check className="h-5 w-5 text-estudos-primary mr-2" />
+            <span className="text-xl font-bold text-estudos-primary">
+              {sessoesCompletas} / {sessoes.length}
+            </span>
+          </div>
+        </div>
+        
+        <div className="p-4 bg-estudos-light dark:bg-estudos-dark/20 rounded-lg">
+          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            Tempo Total
+          </h4>
+          <div className="flex items-center">
+            <Clock className="h-5 w-5 text-estudos-primary mr-2" />
+            <span className="text-xl font-bold text-estudos-primary">
+              {totalHoras}h {minutosRestantes}min
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Lista de Sessões */}
+      <div className="space-y-3">
+        {sessoes.map((sessao) => (
+          <div
+            key={sessao.id}
+            className={`p-3 bg-white dark:bg-gray-800 rounded-lg border ${
+              sessao.completo
+                ? 'border-green-200 dark:border-green-900'
+                : 'border-gray-200 dark:border-gray-700'
+            }`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-start">
+                <button
+                  onClick={() => alternarCompletar(sessao.id)}
+                  className={`mt-1 mr-3 flex-shrink-0 w-5 h-5 rounded-full border ${
+                    sessao.completo
+                      ? 'bg-green-500 border-green-500 text-white'
+                      : 'border-gray-400 dark:border-gray-500'
+                  } flex items-center justify-center`}
+                  aria-label={sessao.completo ? 'Marcar como incompleto' : 'Marcar como completo'}
+                >
+                  {sessao.completo && <Check className="h-3 w-3" />}
+                </button>
+                
+                <div>
+                  <h3
+                    className={`font-medium ${
+                      sessao.completo
+                        ? 'text-gray-500 dark:text-gray-400 line-through'
+                        : 'text-gray-900 dark:text-white'
+                    }`}
+                  >
+                    {sessao.titulo}
+                  </h3>
+                  
+                  {sessao.descricao && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {sessao.descricao}
+                    </p>
+                  )}
+                  
+                  <div className="flex items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>{sessao.duracao} minutos</span>
+                    <span className="mx-2">•</span>
+                    <BookOpen className="h-3 w-3 mr-1" />
+                    <span>{new Date(sessao.data).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-1">
+                <button
+                  onClick={() => iniciarEdicao(sessao)}
+                  className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  aria-label="Editar sessão"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                
+                <button
+                  onClick={() => removerSessao(sessao.id)}
+                  className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                  aria-label="Remover sessão"
+                >
+                  <Trash className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Formulário */}
+      {mostrarForm ? (
+        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {editandoId ? 'Editar Sessão' : 'Nova Sessão de Estudo'}
+            </h3>
+            <button
+              onClick={cancelarForm}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              aria-label="Fechar formulário"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="space-y-3">
+            <div>
+              <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Título
+              </label>
+              <input
+                type="text"
+                id="titulo"
+                value={novaSessao.titulo}
+                onChange={(e) => setNovaSessao({ ...novaSessao, titulo: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                placeholder="Ex: Matemática - Álgebra"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Descrição (opcional)
+              </label>
+              <textarea
+                id="descricao"
+                value={novaSessao.descricao}
+                onChange={(e) => setNovaSessao({ ...novaSessao, descricao: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                placeholder="Detalhes sobre o que será estudado"
+                rows={2}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="duracao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Duração (minutos)
+              </label>
+              <input
+                type="number"
+                id="duracao"
+                min="5"
+                max="240"
+                value={novaSessao.duracao}
+                onChange={(e) => setNovaSessao({ ...novaSessao, duracao: parseInt(e.target.value) || 30 })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={editandoId ? salvarEdicao : adicionarSessao}
+                disabled={!novaSessao.titulo}
+                className="px-4 py-2 bg-estudos-primary text-white rounded-lg hover:bg-estudos-primary/90 focus:outline-none focus:ring-2 focus:ring-estudos-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {editandoId ? 'Salvar Alterações' : 'Adicionar Sessão'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setMostrarForm(true)}
+          className="w-full py-2 flex items-center justify-center bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+          aria-label="Adicionar nova sessão de estudo"
+        >
+          <Plus className="h-5 w-5 mr-1" />
+          <span>Adicionar Sessão de Estudo</span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+================
+File: app/components/estudos/TemporizadorPomodoro.tsx
+================
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Play, Pause, RefreshCw, Settings, X } from 'lucide-react'
+
+export function TemporizadorPomodoro() {
+  const [isActive, setIsActive] = useState(false)
+  const [isPaused, setIsPaused] = useState(true)
+  const [time, setTime] = useState(25 * 60) // 25 minutos em segundos
+  const [ciclo, setCiclo] = useState('foco')
+  const [ciclosCompletos, setCiclosCompletos] = useState(0)
+  const [showSettings, setShowSettings] = useState(false)
+  const [configuracao, setConfiguracao] = useState({
+    tempoFoco: 25,
+    tempoPausa: 5,
+    tempoLongapausa: 15,
+    ciclosAntesLongapausa: 4,
+  })
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (isActive && !isPaused) {
+      interval = setInterval(() => {
+        setTime((time) => {
+          if (time <= 1) {
+            // Tocar som de notificação
+            const audio = new Audio('/notification.mp3')
+            audio.play().catch(() => {
+              // Falha silenciosa se o navegador bloquear o áudio
+              console.log('Notificação de áudio bloqueada pelo navegador')
+            })
+
+            // Alternar entre ciclos
+            if (ciclo === 'foco') {
+              const novosCiclosCompletos = ciclosCompletos + 1
+              setCiclosCompletos(novosCiclosCompletos)
+              
+              // Verificar se deve ser uma pausa longa
+              if (novosCiclosCompletos % configuracao.ciclosAntesLongapausa === 0) {
+                setCiclo('longapausa')
+                return configuracao.tempoLongapausa * 60
+              } else {
+                setCiclo('pausa')
+                return configuracao.tempoPausa * 60
+              }
+            } else {
+              setCiclo('foco')
+              return configuracao.tempoFoco * 60
+            }
+          }
+          return time - 1
+        })
+      }, 1000)
+    } else {
+      interval && clearInterval(interval)
+    }
+
+    return () => {
+      interval && clearInterval(interval)
+    }
+  }, [isActive, isPaused, ciclo, ciclosCompletos, configuracao])
+
+  const formatTime = () => {
+    const minutes = Math.floor(time / 60)
+    const seconds = time % 60
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  }
+
+  const handleStart = () => {
+    setIsActive(true)
+    setIsPaused(false)
+  }
+
+  const handlePause = () => {
+    setIsPaused(true)
+  }
+
+  const handleReset = () => {
+    setIsActive(false)
+    setIsPaused(true)
+    setCiclo('foco')
+    setTime(configuracao.tempoFoco * 60)
+    setCiclosCompletos(0)
+  }
+
+  const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setConfiguracao({
+      ...configuracao,
+      [name]: parseInt(value),
+    })
+  }
+
+  const saveSettings = () => {
+    // Atualizar o tempo atual se estiver pausado
+    if (isPaused || !isActive) {
+      if (ciclo === 'foco') {
+        setTime(configuracao.tempoFoco * 60)
+      } else if (ciclo === 'pausa') {
+        setTime(configuracao.tempoPausa * 60)
+      } else {
+        setTime(configuracao.tempoLongapausa * 60)
+      }
+    }
+    
+    setShowSettings(false)
+  }
+
+  // Determinar a cor com base no ciclo atual
+  const cicloColor = 
+    ciclo === 'foco' 
+      ? 'text-estudos-primary' 
+      : ciclo === 'pausa'
+        ? 'text-green-600 dark:text-green-400'
+        : 'text-blue-600 dark:text-blue-400'
+
+  // Determinar a mensagem com base no ciclo atual
+  const cicloMensagem = 
+    ciclo === 'foco'
+      ? 'Tempo de foco'
+      : ciclo === 'pausa'
+        ? 'Pausa curta'
+        : 'Pausa longa'
+
+  // Determinar a cor de fundo com base no ciclo atual
+  const cicloBgColor = 
+    ciclo === 'foco' 
+      ? 'bg-estudos-light' 
+      : ciclo === 'pausa'
+        ? 'bg-green-100 dark:bg-green-900/20'
+        : 'bg-blue-100 dark:bg-blue-900/20'
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="text-center mb-4">
+        <h3 className={`text-xl font-bold ${cicloColor}`}>{cicloMensagem}</h3>
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
+          Ciclos completos: {ciclosCompletos}
+        </p>
+      </div>
+
+      <div className={`text-4xl font-mono font-bold mb-6 ${cicloBgColor} px-6 py-3 rounded-xl`}>
+        {formatTime()}
+      </div>
+
+      <div className="flex space-x-4 mb-6">
+        {isPaused ? (
+          <button
+            onClick={handleStart}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            aria-label="Iniciar temporizador"
+          >
+            <Play className="h-5 w-5 mr-1" />
+            <span>Iniciar</span>
+          </button>
+        ) : (
+          <button
+            onClick={handlePause}
+            className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            aria-label="Pausar temporizador"
+          >
+            <Pause className="h-5 w-5 mr-1" />
+            <span>Pausar</span>
+          </button>
+        )}
+
+        <button
+          onClick={handleReset}
+          className="flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          aria-label="Reiniciar temporizador"
+        >
+          <RefreshCw className="h-5 w-5 mr-1" />
+          <span>Reiniciar</span>
+        </button>
+
+        <button
+          onClick={() => setShowSettings(true)}
+          className="flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="Configurações do temporizador"
+        >
+          <Settings className="h-5 w-5 mr-1" />
+          <span>Ajustar</span>
+        </button>
+      </div>
+
+      {/* Explicação do ciclo atual */}
+      <div className={`p-3 ${cicloBgColor} rounded-lg text-sm ${cicloColor} max-w-md`}>
+        {ciclo === 'foco' ? (
+          <p>Concentre-se em uma única tarefa. Evite distrações.</p>
+        ) : ciclo === 'pausa' ? (
+          <p>Faça uma pausa curta. Alongue-se ou beba água.</p>
+        ) : (
+          <p>Pausa longa! Levante-se e caminhe um pouco.</p>
+        )}
+      </div>
+
+      {/* Modal de configurações */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Configurações do Temporizador
+              </h3>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                aria-label="Fechar configurações"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="tempoFoco" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tempo de Foco (minutos)
+                </label>
+                <input
+                  type="number"
+                  id="tempoFoco"
+                  name="tempoFoco"
+                  min="1"
+                  max="60"
+                  value={configuracao.tempoFoco}
+                  onChange={handleSettingsChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="tempoPausa" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tempo de Pausa Curta (minutos)
+                </label>
+                <input
+                  type="number"
+                  id="tempoPausa"
+                  name="tempoPausa"
+                  min="1"
+                  max="30"
+                  value={configuracao.tempoPausa}
+                  onChange={handleSettingsChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="tempoLongapausa" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tempo de Pausa Longa (minutos)
+                </label>
+                <input
+                  type="number"
+                  id="tempoLongapausa"
+                  name="tempoLongapausa"
+                  min="5"
+                  max="60"
+                  value={configuracao.tempoLongapausa}
+                  onChange={handleSettingsChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="ciclosAntesLongapausa" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Ciclos antes da Pausa Longa
+                </label>
+                <input
+                  type="number"
+                  id="ciclosAntesLongapausa"
+                  name="ciclosAntesLongapausa"
+                  min="1"
+                  max="10"
+                  value={configuracao.ciclosAntesLongapausa}
+                  onChange={handleSettingsChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={saveSettings}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Salvar Configurações
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+================
+File: app/components/inicio/LembretePausas.tsx
+================
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Play, Pause, RefreshCw } from 'lucide-react'
+
+export function LembretePausas() {
+  const [isActive, setIsActive] = useState(false)
+  const [isPaused, setIsPaused] = useState(true)
+  const [time, setTime] = useState(25 * 60) // 25 minutos em segundos
+  const [ciclo, setCiclo] = useState('foco')
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (isActive && !isPaused) {
+      interval = setInterval(() => {
+        setTime((time) => {
+          if (time <= 1) {
+            // Alternar entre ciclos de foco e pausa
+            if (ciclo === 'foco') {
+              setCiclo('pausa')
+              return 5 * 60 // 5 minutos de pausa
+            } else {
+              setCiclo('foco')
+              return 25 * 60 // 25 minutos de foco
+            }
+          }
+          return time - 1
+        })
+      }, 1000)
+    } else {
+      interval && clearInterval(interval)
+    }
+
+    return () => {
+      interval && clearInterval(interval)
+    }
+  }, [isActive, isPaused, ciclo])
+
+  const formatTime = () => {
+    const minutes = Math.floor(time / 60)
+    const seconds = time % 60
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  }
+
+  const handleStart = () => {
+    setIsActive(true)
+    setIsPaused(false)
+  }
+
+  const handlePause = () => {
+    setIsPaused(true)
+  }
+
+  const handleReset = () => {
+    setIsActive(false)
+    setIsPaused(true)
+    setCiclo('foco')
+    setTime(25 * 60)
+  }
+
+  // Determinar a cor com base no ciclo atual
+  const cicloColor = ciclo === 'foco' 
+    ? 'text-estudos-primary' 
+    : 'text-lazer-primary'
+
+  // Determinar a mensagem com base no ciclo atual
+  const cicloMensagem = ciclo === 'foco'
+    ? 'Tempo de foco'
+    : 'Tempo de pausa'
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="text-center mb-4">
+        <h3 className={`text-xl font-bold ${cicloColor}`}>{cicloMensagem}</h3>
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
+          Alterne entre períodos de foco e pausas curtas
+        </p>
+      </div>
+
+      <div className="text-4xl font-mono font-bold mb-6 bg-gray-100 dark:bg-gray-700 px-6 py-3 rounded-xl">
+        {formatTime()}
+      </div>
+
+      <div className="flex space-x-4">
+        {isPaused ? (
+          <button
+            onClick={handleStart}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            aria-label="Iniciar temporizador"
+          >
+            <Play className="h-5 w-5 mr-1" />
+            <span>Iniciar</span>
+          </button>
+        ) : (
+          <button
+            onClick={handlePause}
+            className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            aria-label="Pausar temporizador"
+          >
+            <Pause className="h-5 w-5 mr-1" />
+            <span>Pausar</span>
+          </button>
+        )}
+
+        <button
+          onClick={handleReset}
+          className="flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          aria-label="Reiniciar temporizador"
+        >
+          <RefreshCw className="h-5 w-5 mr-1" />
+          <span>Reiniciar</span>
+        </button>
+      </div>
+
+      <div className="mt-6 text-sm text-gray-600 dark:text-gray-400">
+        <p>Dicas:</p>
+        <ul className="list-disc pl-5 mt-1">
+          <li>Durante o foco, concentre-se em uma única tarefa</li>
+          <li>Use as pausas para alongar-se ou beber água</li>
+          <li>Ajuste os tempos conforme sua necessidade</li>
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/components/inicio/ListaPrioridades.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { CheckCircle2, Circle, PlusCircle } from 'lucide-react'
+
+type Prioridade = {
+  id: string
+  texto: string
+  concluida: boolean
+}
+
+export function ListaPrioridades() {
+  const [prioridades, setPrioridades] = useState<Prioridade[]>([
+    { id: '1', texto: 'Completar lição de matemática', concluida: false },
+    { id: '2', texto: 'Preparar materiais para amanhã', concluida: false },
+    { id: '3', texto: 'Fazer 30 minutos de exercício', concluida: false },
+  ])
+  const [novoTexto, setNovoTexto] = useState('')
+
+  const toggleConcluida = (id: string) => {
+    setPrioridades(
+      prioridades.map((prioridade) =>
+        prioridade.id === id
+          ? { ...prioridade, concluida: !prioridade.concluida }
+          : prioridade
+      )
+    )
+  }
+
+  const adicionarPrioridade = () => {
+    if (!novoTexto.trim() || prioridades.length >= 3) return
+    
+    setPrioridades([
+      ...prioridades,
+      {
+        id: Date.now().toString(),
+        texto: novoTexto,
+        concluida: false,
+      },
+    ])
+    setNovoTexto('')
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        {prioridades.map((prioridade) => (
+          <div
+            key={prioridade.id}
+            className={`flex items-center p-3 rounded-lg transition-colors duration-200 ${
+              prioridade.concluida
+                ? 'bg-green-50 dark:bg-green-900/20'
+                : 'bg-white dark:bg-gray-800'
+            }`}
+          >
+            <button
+              onClick={() => toggleConcluida(prioridade.id)}
+              className="mr-3 text-green-600 dark:text-green-400 focus:outline-none"
+              aria-label={prioridade.concluida ? 'Marcar como não concluída' : 'Marcar como concluída'}
+            >
+              {prioridade.concluida ? (
+                <CheckCircle2 className="h-6 w-6" />
+              ) : (
+                <Circle className="h-6 w-6" />
+              )}
+            </button>
+            <span
+              className={`flex-1 ${
+                prioridade.concluida
+                  ? 'text-gray-500 dark:text-gray-400 line-through'
+                  : 'text-gray-900 dark:text-white'
+              }`}
+            >
+              {prioridade.texto}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {prioridades.length < 3 && (
+        <div className="flex items-center mt-4">
+          <input
+            type="text"
+            value={novoTexto}
+            onChange={(e) => setNovoTexto(e.target.value)}
+            placeholder="Nova prioridade..."
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            maxLength={50}
+          />
+          <button
+            onClick={adicionarPrioridade}
+            className="bg-blue-600 text-white px-3 py-2 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Adicionar prioridade"
+          >
+            <PlusCircle className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+
+      {prioridades.length >= 3 && (
+        <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+          Máximo de 3 prioridades para manter o foco.
+        </p>
+      )}
+    </div>
+  )
+}
+
+================
+File: app/components/inicio/PainelDia.tsx
+================
+'use client'
+
+import { useState } from 'react'
+
+type BlocoTempo = {
+  id: string
+  hora: string
+  atividade: string
+  categoria: 'inicio' | 'alimentacao' | 'estudos' | 'saude' | 'lazer' | 'nenhuma'
+}
+
+// Dados de exemplo para demonstração
+const blocosIniciais: BlocoTempo[] = [
+  { id: '1', hora: '08:00', atividade: 'Café da manhã', categoria: 'alimentacao' },
+  { id: '2', hora: '09:00', atividade: 'Estudar matemática', categoria: 'estudos' },
+  { id: '3', hora: '10:00', atividade: 'Pausa para alongamento', categoria: 'saude' },
+  { id: '4', hora: '11:00', atividade: 'Continuar estudos', categoria: 'estudos' },
+  { id: '5', hora: '12:00', atividade: 'Almoço', categoria: 'alimentacao' },
+  { id: '6', hora: '13:00', atividade: 'Descanso breve', categoria: 'lazer' },
+  { id: '7', hora: '14:00', atividade: 'Reunião online', categoria: 'estudos' },
+  { id: '8', hora: '15:00', atividade: 'Exercício físico', categoria: 'saude' },
+  { id: '9', hora: '16:00', atividade: 'Leitura', categoria: 'lazer' },
+  { id: '10', hora: '17:00', atividade: 'Organizar materiais', categoria: 'estudos' },
+  { id: '11', hora: '18:00', atividade: 'Jantar', categoria: 'alimentacao' },
+  { id: '12', hora: '19:00', atividade: 'Tempo livre', categoria: 'lazer' },
+]
+
+export function PainelDia() {
+  const [blocos, setBlocos] = useState<BlocoTempo[]>(blocosIniciais)
+  
+  // Função para obter a cor de fundo baseada na categoria
+  const getBgColor = (categoria: BlocoTempo['categoria']) => {
+    switch (categoria) {
+      case 'inicio':
+        return 'bg-inicio-light border-inicio-primary'
+      case 'alimentacao':
+        return 'bg-alimentacao-light border-alimentacao-primary'
+      case 'estudos':
+        return 'bg-estudos-light border-estudos-primary'
+      case 'saude':
+        return 'bg-saude-light border-saude-primary'
+      case 'lazer':
+        return 'bg-lazer-light border-lazer-primary'
+      default:
+        return 'bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600'
+    }
+  }
+
+  // Função para editar um bloco (simplificada para o MVP)
+  const editarBloco = (id: string, novaAtividade: string) => {
+    setBlocos(
+      blocos.map((bloco) =>
+        bloco.id === id ? { ...bloco, atividade: novaAtividade } : bloco
+      )
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-2">
+        {blocos.map((bloco) => (
+          <div
+            key={bloco.id}
+            className={`p-3 rounded-lg border-l-4 ${getBgColor(bloco.categoria)} transition-all duration-200`}
+          >
+            <div className="flex items-center">
+              <span className="font-medium text-gray-700 dark:text-gray-300 w-16">
+                {bloco.hora}
+              </span>
+              <span className="flex-1 text-gray-900 dark:text-white">
+                {bloco.atividade}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/components/layout/Header.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { Menu, X, Sun, Moon, HelpCircle } from 'lucide-react'
+import { useTheme } from 'next-themes'
+
+export function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
+  }
+
+  return (
+    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+        >
+          {mobileMenuOpen ? (
+            <X className="block h-6 w-6" aria-hidden="true" />
+          ) : (
+            <Menu className="block h-6 w-6" aria-hidden="true" />
+          )}
+        </button>
+
+        {/* User profile */}
+        <div className="flex-1 flex justify-end items-center space-x-4">
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-6 w-6" aria-hidden="true" />
+            ) : (
+              <Moon className="h-6 w-6" aria-hidden="true" />
+            )}
+          </button>
+
+          {/* Help button */}
+          <button
+            className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Ajuda"
+          >
+            <HelpCircle className="h-6 w-6" aria-hidden="true" />
+          </button>
+
+          {/* User profile */}
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Usuário</span>
+            <div className="ml-2 h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">U</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu, show/hide based on menu state */}
+      {mobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a
+              href="/"
+              className="block px-3 py-2 rounded-md text-base font-medium text-inicio-primary bg-inicio-light"
+            >
+              Início
+            </a>
+            <a
+              href="/alimentacao"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Alimentação
+            </a>
+            <a
+              href="/estudos"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Estudos
+            </a>
+            <a
+              href="/saude"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Saúde
+            </a>
+            <a
+              href="/lazer"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Lazer
+            </a>
+          </div>
+        </div>
+      )}
+    </header>
+  )
+}
+
+================
+File: app/components/layout/Sidebar.tsx
+================
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Home, Utensils, BookOpen, Heart, Smile } from 'lucide-react'
+
+type NavItem = {
+  name: string
+  href: string
+  icon: React.ElementType
+  color: string
+  activeColor: string
+}
+
+const navItems: NavItem[] = [
+  {
+    name: 'Início',
+    href: '/',
+    icon: Home,
+    color: 'text-inicio-primary',
+    activeColor: 'bg-inicio-light',
+  },
+  {
+    name: 'Alimentação',
+    href: '/alimentacao',
+    icon: Utensils,
+    color: 'text-alimentacao-primary',
+    activeColor: 'bg-alimentacao-light',
+  },
+  {
+    name: 'Estudos',
+    href: '/estudos',
+    icon: BookOpen,
+    color: 'text-estudos-primary',
+    activeColor: 'bg-estudos-light',
+  },
+  {
+    name: 'Saúde',
+    href: '/saude',
+    icon: Heart,
+    color: 'text-saude-primary',
+    activeColor: 'bg-saude-light',
+  },
+  {
+    name: 'Lazer',
+    href: '/lazer',
+    icon: Smile,
+    color: 'text-lazer-primary',
+    activeColor: 'bg-lazer-light',
+  },
+]
+
+export function Sidebar() {
+  const pathname = usePathname()
+
+  return (
+    <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
+      <div className="flex flex-col flex-1 min-h-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-center h-16 flex-shrink-0 px-4 bg-gray-50 dark:bg-gray-900">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Painel ND</h1>
+        </div>
+        <div className="flex flex-col flex-1 pt-5 pb-4 overflow-y-auto">
+          <nav className="mt-5 flex-1 px-2 space-y-2" aria-label="Sidebar">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`
+                    flex items-center px-4 py-3 text-lg font-medium rounded-xl transition-colors duration-200
+                    ${isActive 
+                      ? `${item.activeColor} ${item.color}` 
+                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}
+                  `}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <item.icon className="mr-3 h-6 w-6 flex-shrink-0" aria-hidden="true" />
+                  <span>{item.name}</span>
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
+================
+File: app/components/saude/MonitoramentoHumor.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { Plus, X, Calendar, BarChart, ChevronLeft, ChevronRight } from 'lucide-react'
+
+type NivelHumor = 1 | 2 | 3 | 4 | 5
+type RegistroHumor = {
+  id: string
+  data: string
+  nivel: NivelHumor
+  notas: string
+  fatores: string[]
+}
+
+const EMOJIS: Record<NivelHumor, string> = {
+  1: '😞',
+  2: '😕',
+  3: '😐',
+  4: '🙂',
+  5: '😄',
+}
+
+const FATORES_COMUNS = [
+  'Sono adequado',
+  'Boa alimentação',
+  'Exercício físico',
+  'Socialização',
+  'Medicação em dia',
+  'Estresse',
+  'Ansiedade',
+  'Cansaço',
+  'Sobrecarga sensorial',
+]
+
+export function MonitoramentoHumor() {
+  const [registros, setRegistros] = useState<RegistroHumor[]>([
+    {
+      id: '1',
+      data: '2023-03-01',
+      nivel: 4,
+      notas: 'Dia produtivo, consegui focar bem nas tarefas',
+      fatores: ['Sono adequado', 'Medicação em dia'],
+    },
+    {
+      id: '2',
+      data: '2023-03-02',
+      nivel: 3,
+      notas: 'Dia neutro, algumas dificuldades de concentração',
+      fatores: ['Cansaço'],
+    },
+    {
+      id: '3',
+      data: '2023-03-03',
+      nivel: 5,
+      notas: 'Excelente dia! Consegui completar todas as tarefas planejadas',
+      fatores: ['Sono adequado', 'Boa alimentação', 'Exercício físico', 'Medicação em dia'],
+    },
+  ])
+  
+  const [mostrarForm, setMostrarForm] = useState(false)
+  const [novoRegistro, setNovoRegistro] = useState<{
+    nivel: NivelHumor
+    notas: string
+    fatores: string[]
+  }>({
+    nivel: 3,
+    notas: '',
+    fatores: [],
+  })
+  
+  const [novoFator, setNovoFator] = useState('')
+  const [mesAtual, setMesAtual] = useState(() => {
+    const hoje = new Date()
+    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`
+  })
+
+  const adicionarRegistro = () => {
+    const hoje = new Date().toISOString().split('T')[0]
+    
+    setRegistros([
+      ...registros,
+      {
+        id: Date.now().toString(),
+        data: hoje,
+        nivel: novoRegistro.nivel,
+        notas: novoRegistro.notas,
+        fatores: [...novoRegistro.fatores],
+      },
+    ])
+    
+    resetForm()
+  }
+
+  const toggleFator = (fator: string) => {
+    if (novoRegistro.fatores.includes(fator)) {
+      setNovoRegistro({
+        ...novoRegistro,
+        fatores: novoRegistro.fatores.filter((f) => f !== fator),
+      })
+    } else {
+      setNovoRegistro({
+        ...novoRegistro,
+        fatores: [...novoRegistro.fatores, fator],
+      })
+    }
+  }
+
+  const adicionarNovoFator = () => {
+    if (!novoFator || novoRegistro.fatores.includes(novoFator)) return
+    
+    setNovoRegistro({
+      ...novoRegistro,
+      fatores: [...novoRegistro.fatores, novoFator],
+    })
+    
+    setNovoFator('')
+  }
+
+  const resetForm = () => {
+    setNovoRegistro({
+      nivel: 3,
+      notas: '',
+      fatores: [],
+    })
+    setNovoFator('')
+    setMostrarForm(false)
+  }
+
+  const mesAnterior = () => {
+    const [ano, mes] = mesAtual.split('-').map(Number)
+    const novaData = new Date(ano, mes - 2, 1)
+    setMesAtual(`${novaData.getFullYear()}-${String(novaData.getMonth() + 1).padStart(2, '0')}`)
+  }
+
+  const proximoMes = () => {
+    const [ano, mes] = mesAtual.split('-').map(Number)
+    const novaData = new Date(ano, mes, 1)
+    setMesAtual(`${novaData.getFullYear()}-${String(novaData.getMonth() + 1).padStart(2, '0')}`)
+  }
+
+  // Filtrar registros do mês atual
+  const registrosMes = registros.filter((reg) => reg.data.startsWith(mesAtual))
+  
+  // Calcular média do mês
+  const mediaHumor = registrosMes.length
+    ? Math.round((registrosMes.reduce((sum, reg) => sum + reg.nivel, 0) / registrosMes.length) * 10) / 10
+    : 0
+  
+  // Encontrar fatores mais comuns
+  const contarFatores = () => {
+    const contagem: Record<string, number> = {}
+    registrosMes.forEach((reg) => {
+      reg.fatores.forEach((fator) => {
+        contagem[fator] = (contagem[fator] || 0) + 1
+      })
+    })
+    
+    return Object.entries(contagem)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([fator, _]) => fator)
+  }
+  
+  const fatoresComuns = contarFatores()
+  
+  // Formatar nome do mês
+  const formatarMes = () => {
+    const [ano, mes] = mesAtual.split('-')
+    return new Date(Number(ano), Number(mes) - 1, 1).toLocaleDateString('pt-BR', {
+      month: 'long',
+      year: 'numeric',
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Cabeçalho do mês */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={mesAnterior}
+          className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+          aria-label="Mês anterior"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        
+        <h3 className="font-medium text-gray-900 dark:text-white">
+          {formatarMes()}
+        </h3>
+        
+        <button
+          onClick={proximoMes}
+          className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+          aria-label="Próximo mês"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Resumo do mês */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            Humor Médio
+          </h4>
+          <div className="flex items-center">
+            {mediaHumor > 0 && (
+              <>
+                <span className="text-2xl mr-2">
+                  {EMOJIS[Math.round(mediaHumor) as NivelHumor]}
+                </span>
+                <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                  {mediaHumor.toFixed(1)}
+                </span>
+              </>
+            )}
+            {mediaHumor === 0 && (
+              <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Sem registros
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            Fatores Comuns
+          </h4>
+          {fatoresComuns.length > 0 ? (
+            <ul className="text-sm text-purple-700 dark:text-purple-300">
+              {fatoresComuns.map((fator) => (
+                <li key={fator} className="flex items-center">
+                  <span className="h-1.5 w-1.5 rounded-full bg-purple-500 mr-2"></span>
+                  {fator}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+              Sem dados suficientes
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Botão para adicionar novo registro */}
+      {!mostrarForm ? (
+        <button
+          onClick={() => setMostrarForm(true)}
+          className="flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
+          aria-label="Adicionar registro de humor"
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Registrar humor de hoje
+        </button>
+      ) : (
+        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium text-purple-800 dark:text-purple-300">
+              Como está seu humor hoje?
+            </h3>
+            <button
+              onClick={resetForm}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              aria-label="Cancelar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          
+          <div className="space-y-3">
+            {/* Seleção de nível de humor */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nível de humor
+              </label>
+              <div className="flex justify-between">
+                {([1, 2, 3, 4, 5] as NivelHumor[]).map((nivel) => (
+                  <button
+                    key={nivel}
+                    onClick={() => setNovoRegistro({ ...novoRegistro, nivel })}
+                    className={`flex flex-col items-center p-2 rounded-lg ${
+                      novoRegistro.nivel === nivel
+                        ? 'bg-purple-100 dark:bg-purple-900/40 ring-2 ring-purple-500'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                    aria-label={`Nível de humor ${nivel}`}
+                  >
+                    <span className="text-2xl mb-1">{EMOJIS[nivel]}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {nivel}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Fatores */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Fatores que influenciaram (opcional)
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {FATORES_COMUNS.map((fator) => (
+                  <button
+                    key={fator}
+                    onClick={() => toggleFator(fator)}
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      novoRegistro.fatores.includes(fator)
+                        ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700'
+                    }`}
+                    aria-label={`${
+                      novoRegistro.fatores.includes(fator) ? 'Remover fator' : 'Adicionar fator'
+                    } ${fator}`}
+                  >
+                    {fator}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={novoFator}
+                  onChange={(e) => setNovoFator(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-800 dark:text-white text-sm"
+                  placeholder="Adicionar outro fator"
+                />
+                <button
+                  onClick={adicionarNovoFator}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:bg-purple-700 dark:hover:bg-purple-600"
+                  aria-label="Adicionar fator personalizado"
+                  disabled={!novoFator}
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Notas */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Notas (opcional)
+              </label>
+              <textarea
+                value={novoRegistro.notas}
+                onChange={(e) => setNovoRegistro({ ...novoRegistro, notas: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-800 dark:text-white text-sm"
+                placeholder="Como foi seu dia? O que você sentiu?"
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                onClick={adicionarRegistro}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:bg-purple-700 dark:hover:bg-purple-600"
+                aria-label="Salvar registro de humor"
+              >
+                Salvar registro
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lista de Registros do Mês */}
+      <div className="space-y-3 mt-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Registros do mês
+          </h3>
+          <BarChart className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+        </div>
+        
+        {registrosMes.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+            Nenhum registro para este mês. Adicione um novo registro para começar.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {registrosMes
+              .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+              .map((registro) => (
+                <div
+                  key={registro.id}
+                  className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-start">
+                      <div className="flex items-center justify-center w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full mr-3 flex-shrink-0">
+                        <span className="text-xl">{EMOJIS[registro.nivel]}</span>
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-center">
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            Nível {registro.nivel}
+                          </h3>
+                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {new Date(registro.data).toLocaleDateString()}
+                          </span>
+                        </div>
+                        
+                        {registro.notas && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {registro.notas}
+                          </p>
+                        )}
+                        
+                        {registro.fatores.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {registro.fatores.map((fator) => (
+                              <span
+                                key={fator}
+                                className="text-xs px-2 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-full"
+                              >
+                                {fator}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/components/saude/RegistroMedicamentos.tsx
+================
+'use client'
+
+import { useState } from 'react'
+import { Pill, Plus, X, Edit, Trash, Check, Clock, Calendar } from 'lucide-react'
+
+type Medicamento = {
+  id: string
+  nome: string
+  dosagem: string
+  frequencia: string
+  horarios: string[]
+  observacoes: string
+  dataInicio: string
+  ultimaTomada: string | null
+}
+
+export function RegistroMedicamentos() {
+  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([
+    {
+      id: '1',
+      nome: 'Ritalina',
+      dosagem: '10mg',
+      frequencia: 'Diária',
+      horarios: ['08:00', '12:00'],
+      observacoes: 'Tomar com alimentos',
+      dataInicio: '2023-01-15',
+      ultimaTomada: '2023-03-03T08:00:00',
+    },
+    {
+      id: '2',
+      nome: 'Vitamina D',
+      dosagem: '2000 UI',
+      frequencia: 'Diária',
+      horarios: ['08:00'],
+      observacoes: 'Tomar após o café da manhã',
+      dataInicio: '2023-02-01',
+      ultimaTomada: '2023-03-03T08:00:00',
+    },
+  ])
+  
+  const [novoMedicamento, setNovoMedicamento] = useState({
+    nome: '',
+    dosagem: '',
+    frequencia: 'Diária',
+    horarios: ['08:00'],
+    observacoes: '',
+  })
+  
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [mostrarForm, setMostrarForm] = useState(false)
+  const [novoHorario, setNovoHorario] = useState('08:00')
+
+  const adicionarMedicamento = () => {
+    if (!novoMedicamento.nome) return
+
+    const hoje = new Date().toISOString().split('T')[0]
+    
+    setMedicamentos([
+      ...medicamentos,
+      {
+        id: Date.now().toString(),
+        nome: novoMedicamento.nome,
+        dosagem: novoMedicamento.dosagem,
+        frequencia: novoMedicamento.frequencia,
+        horarios: [...novoMedicamento.horarios],
+        observacoes: novoMedicamento.observacoes,
+        dataInicio: hoje,
+        ultimaTomada: null,
+      },
+    ])
+    
+    resetForm()
+  }
+
+  const removerMedicamento = (id: string) => {
+    setMedicamentos(medicamentos.filter((med) => med.id !== id))
+  }
+
+  const registrarTomada = (id: string) => {
+    const agora = new Date().toISOString()
+    
+    setMedicamentos(
+      medicamentos.map((med) =>
+        med.id === id ? { ...med, ultimaTomada: agora } : med
+      )
+    )
+  }
+
+  const iniciarEdicao = (medicamento: Medicamento) => {
+    setEditandoId(medicamento.id)
+    setNovoMedicamento({
+      nome: medicamento.nome,
+      dosagem: medicamento.dosagem,
+      frequencia: medicamento.frequencia,
+      horarios: [...medicamento.horarios],
+      observacoes: medicamento.observacoes,
+    })
+    setMostrarForm(true)
+  }
+
+  const salvarEdicao = () => {
+    if (!editandoId || !novoMedicamento.nome) return
+
+    setMedicamentos(
+      medicamentos.map((med) =>
+        med.id === editandoId
+          ? {
+              ...med,
+              nome: novoMedicamento.nome,
+              dosagem: novoMedicamento.dosagem,
+              frequencia: novoMedicamento.frequencia,
+              horarios: [...novoMedicamento.horarios],
+              observacoes: novoMedicamento.observacoes,
+            }
+          : med
+      )
+    )
+    
+    resetForm()
+  }
+
+  const adicionarHorario = () => {
+    if (!novoHorario || novoMedicamento.horarios.includes(novoHorario)) return
+    
+    setNovoMedicamento({
+      ...novoMedicamento,
+      horarios: [...novoMedicamento.horarios, novoHorario].sort(),
+    })
+    
+    setNovoHorario('08:00')
+  }
+
+  const removerHorario = (horario: string) => {
+    setNovoMedicamento({
+      ...novoMedicamento,
+      horarios: novoMedicamento.horarios.filter((h) => h !== horario),
+    })
+  }
+
+  const resetForm = () => {
+    setNovoMedicamento({
+      nome: '',
+      dosagem: '',
+      frequencia: 'Diária',
+      horarios: ['08:00'],
+      observacoes: '',
+    })
+    setEditandoId(null)
+    setMostrarForm(false)
+    setNovoHorario('08:00')
+  }
+
+  const formatarDataHora = (dataHora: string | null) => {
+    if (!dataHora) return 'Nunca'
+    
+    const data = new Date(dataHora)
+    return `${data.toLocaleDateString()} às ${data.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Botão para adicionar novo medicamento */}
+      {!mostrarForm ? (
+        <button
+          onClick={() => setMostrarForm(true)}
+          className="flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          aria-label="Adicionar medicamento"
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Adicionar medicamento
+        </button>
+      ) : (
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium text-blue-800 dark:text-blue-300">
+              {editandoId ? 'Editar medicamento' : 'Novo medicamento'}
+            </h3>
+            <button
+              onClick={resetForm}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              aria-label="Cancelar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nome
+                </label>
+                <input
+                  type="text"
+                  value={novoMedicamento.nome}
+                  onChange={(e) => setNovoMedicamento({ ...novoMedicamento, nome: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white text-sm"
+                  placeholder="Nome do medicamento"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Dosagem
+                </label>
+                <input
+                  type="text"
+                  value={novoMedicamento.dosagem}
+                  onChange={(e) => setNovoMedicamento({ ...novoMedicamento, dosagem: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white text-sm"
+                  placeholder="Ex: 10mg, 1 comprimido"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Frequência
+              </label>
+              <select
+                value={novoMedicamento.frequencia}
+                onChange={(e) => setNovoMedicamento({ ...novoMedicamento, frequencia: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white text-sm"
+              >
+                <option value="Diária">Diária</option>
+                <option value="Dias alternados">Dias alternados</option>
+                <option value="Semanal">Semanal</option>
+                <option value="Quando necessário">Quando necessário</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Horários
+              </label>
+              
+              <div className="flex flex-wrap gap-2 mb-2">
+                {novoMedicamento.horarios.map((horario) => (
+                  <div
+                    key={horario}
+                    className="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded"
+                  >
+                    <Clock className="h-3 w-3 mr-1" />
+                    {horario}
+                    <button
+                      onClick={() => removerHorario(horario)}
+                      className="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                      aria-label={`Remover horário ${horario}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex gap-2">
+                <input
+                  type="time"
+                  value={novoHorario}
+                  onChange={(e) => setNovoHorario(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white text-sm"
+                />
+                <button
+                  onClick={adicionarHorario}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600"
+                  aria-label="Adicionar horário"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Observações
+              </label>
+              <textarea
+                value={novoMedicamento.observacoes}
+                onChange={(e) => setNovoMedicamento({ ...novoMedicamento, observacoes: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white text-sm"
+                placeholder="Observações adicionais"
+                rows={2}
+              />
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                onClick={editandoId ? salvarEdicao : adicionarMedicamento}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600"
+                aria-label={editandoId ? 'Salvar alterações' : 'Adicionar medicamento'}
+              >
+                {editandoId ? 'Salvar alterações' : 'Adicionar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lista de Medicamentos */}
+      <div className="space-y-3 mt-4">
+        {medicamentos.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+            Nenhum medicamento registrado. Adicione um novo medicamento para começar.
+          </p>
+        ) : (
+          medicamentos.map((medicamento) => (
+            <div
+              key={medicamento.id}
+              className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex justify-between">
+                <div className="flex items-start">
+                  <Pill className="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
+                  <div>
+                    <div className="flex items-center">
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        {medicamento.nome}
+                      </h3>
+                      {medicamento.dosagem && (
+                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                          ({medicamento.dosagem})
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center mb-1">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>
+                          {medicamento.horarios.join(', ')} • {medicamento.frequencia}
+                        </span>
+                      </div>
+                      
+                      {medicamento.observacoes && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {medicamento.observacoes}
+                        </p>
+                      )}
+                      
+                      <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        <span>Desde {new Date(medicamento.dataInicio).toLocaleDateString()}</span>
+                      </div>
+                      
+                      <div className="mt-1 text-xs">
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Última tomada: {formatarDataHora(medicamento.ultimaTomada)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => registrarTomada(medicamento.id)}
+                    className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                    aria-label="Registrar tomada"
+                  >
+                    <Check className="h-4 w-4" />
+                  </button>
+                  
+                  <button
+                    onClick={() => iniciarEdicao(medicamento)}
+                    className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    aria-label="Editar medicamento"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  
+                  <button
+                    onClick={() => removerMedicamento(medicamento.id)}
+                    className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                    aria-label="Remover medicamento"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/components/ui/Card.tsx
+================
+'use client'
+
+interface CardProps {
+  children: React.ReactNode
+  title?: string
+  className?: string
+}
+
+export function Card({ children, title, className = '' }: CardProps) {
+  return (
+    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden ${className}`}>
+      {title && (
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white">{title}</h2>
+        </div>
+      )}
+      <div className="p-4">{children}</div>
+    </div>
+  )
+}
+
+================
+File: app/components/ThemeProvider.tsx
+================
+'use client'
+
+import { createContext, useContext, useEffect, useState } from 'react'
+
+type Theme = 'dark' | 'light' | 'system'
+
+type ThemeProviderProps = {
+  children: React.ReactNode
+  defaultTheme?: Theme
+  enableSystem?: boolean
+  disableTransitionOnChange?: boolean
+  attribute?: string
+}
+
+type ThemeProviderState = {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+  systemTheme: 'dark' | 'light' | undefined
+}
+
+const initialState: ThemeProviderState = {
+  theme: 'system',
+  setTheme: () => null,
+  systemTheme: undefined,
+}
+
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+
+export function ThemeProvider({
+  children,
+  defaultTheme = 'system',
+  enableSystem = true,
+  disableTransitionOnChange = false,
+  attribute = 'class',
+  ...props
+}: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<Theme>(defaultTheme)
+  const [systemTheme, setSystemTheme] = useState<'dark' | 'light' | undefined>(undefined)
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    
+    // Remove transition classes
+    if (disableTransitionOnChange) {
+      root.classList.add('transition-none')
+      window.setTimeout(() => {
+        root.classList.remove('transition-none')
+      }, 0)
+    }
+
+    // Check for system preference
+    if (theme === 'system' && enableSystem) {
+      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      setSystemTheme(systemPreference)
+      
+      root.classList.remove('light', 'dark')
+      root.classList.add(systemPreference)
+      return
+    }
+
+    // Apply theme
+    root.classList.remove('light', 'dark')
+    root.classList.add(theme)
+  }, [theme, disableTransitionOnChange, enableSystem])
+
+  // Listen for system preference changes
+  useEffect(() => {
+    if (!enableSystem) return
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    
+    const handleChange = () => {
+      const newSystemTheme = mediaQuery.matches ? 'dark' : 'light'
+      setSystemTheme(newSystemTheme)
+      
+      if (theme === 'system') {
+        document.documentElement.classList.remove('light', 'dark')
+        document.documentElement.classList.add(newSystemTheme)
+      }
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [enableSystem, theme])
+
+  const setTheme = (theme: Theme) => {
+    setThemeState(theme)
+    // Save to localStorage
+    localStorage.setItem('theme', theme)
+  }
+
+  // Initialize from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme | null
+    if (savedTheme) {
+      setThemeState(savedTheme)
+    }
+  }, [])
+
+  const value = {
+    theme,
+    setTheme,
+    systemTheme,
+  }
+
+  return (
+    <ThemeProviderContext.Provider {...props} value={value}>
+      {children}
+    </ThemeProviderContext.Provider>
+  )
+}
+
+export const useTheme = () => {
+  const context = useContext(ThemeProviderContext)
+  
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider')
+  }
+
+  return context
+}
+
+================
+File: app/estudos/page.tsx
+================
+import { Card } from '@/app/components/ui/Card'
+import { TemporizadorPomodoro } from '@/app/components/estudos/TemporizadorPomodoro'
+import { RegistroEstudos } from '@/app/components/estudos/RegistroEstudos'
+
+export default function EstudosPage() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Estudos</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Temporizador Pomodoro Adaptado */}
+        <Card title="Temporizador Pomodoro">
+          <TemporizadorPomodoro />
+        </Card>
+        
+        {/* Registro de Sessões de Estudo */}
+        <Card title="Registro de Estudos">
+          <RegistroEstudos />
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/saude/page.tsx
+================
+import { Card } from '@/app/components/ui/Card'
+import { RegistroMedicamentos } from '@/app/components/saude/RegistroMedicamentos'
+import { MonitoramentoHumor } from '@/app/components/saude/MonitoramentoHumor'
+
+export default function SaudePage() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Saúde</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Registro de Medicamentos */}
+        <Card title="Medicamentos">
+          <RegistroMedicamentos />
+        </Card>
+        
+        {/* Monitoramento de Humor */}
+        <Card title="Monitoramento de Humor">
+          <MonitoramentoHumor />
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+================
+File: app/store/index.ts
+================
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+// Tipos para o estado global
+export type Tarefa = {
+  id: string
+  texto: string
+  concluida: boolean
+  categoria: 'inicio' | 'alimentacao' | 'estudos' | 'saude' | 'lazer'
+  data: string // formato YYYY-MM-DD
+}
+
+export type BlocoTempo = {
+  id: string
+  hora: string
+  atividade: string
+  categoria: 'inicio' | 'alimentacao' | 'estudos' | 'saude' | 'lazer' | 'nenhuma'
+  data: string // formato YYYY-MM-DD
+}
+
+export type Refeicao = {
+  id: string
+  hora: string
+  descricao: string
+  foto?: string
+  data: string // formato YYYY-MM-DD
+}
+
+export type Medicacao = {
+  id: string
+  nome: string
+  horarios: string[]
+  tomada: Record<string, boolean> // chave: data-horario, valor: tomada ou não
+}
+
+export type ConfiguracaoUsuario = {
+  tempoFoco: number // em minutos
+  tempoPausa: number // em minutos
+  temaEscuro: boolean
+  reducaoEstimulos: boolean
+}
+
+// Interface do estado global
+interface AppState {
+  tarefas: Tarefa[]
+  blocosTempo: BlocoTempo[]
+  refeicoes: Refeicao[]
+  medicacoes: Medicacao[]
+  configuracao: ConfiguracaoUsuario
+  
+  // Ações para tarefas
+  adicionarTarefa: (tarefa: Omit<Tarefa, 'id'>) => void
+  removerTarefa: (id: string) => void
+  toggleTarefaConcluida: (id: string) => void
+  
+  // Ações para blocos de tempo
+  adicionarBlocoTempo: (bloco: Omit<BlocoTempo, 'id'>) => void
+  atualizarBlocoTempo: (id: string, bloco: Partial<BlocoTempo>) => void
+  removerBlocoTempo: (id: string) => void
+  
+  // Ações para refeições
+  adicionarRefeicao: (refeicao: Omit<Refeicao, 'id'>) => void
+  removerRefeicao: (id: string) => void
+  
+  // Ações para medicações
+  adicionarMedicacao: (medicacao: Omit<Medicacao, 'id'>) => void
+  marcarMedicacaoTomada: (id: string, data: string, horario: string, tomada: boolean) => void
+  
+  // Ações para configurações
+  atualizarConfiguracao: (config: Partial<ConfiguracaoUsuario>) => void
+}
+
+// Criação da store com persistência local
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      tarefas: [],
+      blocosTempo: [],
+      refeicoes: [],
+      medicacoes: [],
+      configuracao: {
+        tempoFoco: 25,
+        tempoPausa: 5,
+        temaEscuro: false,
+        reducaoEstimulos: false,
+      },
+      
+      // Implementações das ações para tarefas
+      adicionarTarefa: (tarefa) => 
+        set((state) => ({
+          tarefas: [...state.tarefas, { ...tarefa, id: Date.now().toString() }],
+        })),
+      
+      removerTarefa: (id) =>
+        set((state) => ({
+          tarefas: state.tarefas.filter((t) => t.id !== id),
+        })),
+      
+      toggleTarefaConcluida: (id) =>
+        set((state) => ({
+          tarefas: state.tarefas.map((t) =>
+            t.id === id ? { ...t, concluida: !t.concluida } : t
+          ),
+        })),
+      
+      // Implementações das ações para blocos de tempo
+      adicionarBlocoTempo: (bloco) =>
+        set((state) => ({
+          blocosTempo: [...state.blocosTempo, { ...bloco, id: Date.now().toString() }],
+        })),
+      
+      atualizarBlocoTempo: (id, bloco) =>
+        set((state) => ({
+          blocosTempo: state.blocosTempo.map((b) =>
+            b.id === id ? { ...b, ...bloco } : b
+          ),
+        })),
+      
+      removerBlocoTempo: (id) =>
+        set((state) => ({
+          blocosTempo: state.blocosTempo.filter((b) => b.id !== id),
+        })),
+      
+      // Implementações das ações para refeições
+      adicionarRefeicao: (refeicao) =>
+        set((state) => ({
+          refeicoes: [...state.refeicoes, { ...refeicao, id: Date.now().toString() }],
+        })),
+      
+      removerRefeicao: (id) =>
+        set((state) => ({
+          refeicoes: state.refeicoes.filter((r) => r.id !== id),
+        })),
+      
+      // Implementações das ações para medicações
+      adicionarMedicacao: (medicacao) =>
+        set((state) => ({
+          medicacoes: [...state.medicacoes, { ...medicacao, id: Date.now().toString() }],
+        })),
+      
+      marcarMedicacaoTomada: (id, data, horario, tomada) =>
+        set((state) => ({
+          medicacoes: state.medicacoes.map((m) =>
+            m.id === id
+              ? {
+                  ...m,
+                  tomada: {
+                    ...m.tomada,
+                    [`${data}-${horario}`]: tomada,
+                  },
+                }
+              : m
+          ),
+        })),
+      
+      // Implementações das ações para configurações
+      atualizarConfiguracao: (config) =>
+        set((state) => ({
+          configuracao: {
+            ...state.configuracao,
+            ...config,
+          },
+        })),
+    }),
+    {
+      name: 'painel-neurodivergentes-storage',
+    }
+  )
+)
+
+================
+File: app/types/index.ts
+================
+// Tipos compartilhados para todo o aplicativo
+
+// Categorias principais do aplicativo
+export type Categoria = 'inicio' | 'alimentacao' | 'estudos' | 'saude' | 'lazer' | 'nenhuma'
+
+// Opções de humor para o monitor de humor
+export type OpcaoHumor = 'otimo' | 'bom' | 'neutro' | 'baixo' | 'ruim'
+
+// Interface para atividades de lazer
+export type AtividadeLazer = {
+  id: string
+  nome: string
+  descricao: string
+  duracao: number // em minutos
+  categoria: 'ativo' | 'passivo' | 'criativo' | 'social'
+}
+
+// Interface para materiais de estudo
+export type MaterialEstudo = {
+  id: string
+  titulo: string
+  tipo: 'livro' | 'video' | 'artigo' | 'exercicio' | 'outro'
+  url?: string
+  progresso: number // 0-100
+  notas?: string
+}
+
+// Interface para registro de humor
+export type RegistroHumor = {
+  id: string
+  data: string // formato YYYY-MM-DD
+  humor: OpcaoHumor
+  notas?: string
+}
+
+// Interface para lembretes
+export type Lembrete = {
+  id: string
+  titulo: string
+  descricao?: string
+  data: string // formato YYYY-MM-DD
+  hora: string // formato HH:MM
+  recorrente: boolean
+  diasRecorrencia?: ('seg' | 'ter' | 'qua' | 'qui' | 'sex' | 'sab' | 'dom')[]
+  categoria: Categoria
+  completado: boolean
+}
+
+// Interface para registro de hidratação
+export type RegistroHidratacao = {
+  id: string
+  data: string // formato YYYY-MM-DD
+  quantidade: number // em ml
+  hora: string // formato HH:MM
+}
+
+// Interface para sessão de estudo
+export type SessaoEstudo = {
+  id: string
+  data: string // formato YYYY-MM-DD
+  inicio: string // formato HH:MM
+  fim: string // formato HH:MM
+  materia: string
+  tecnica: 'pomodoro' | 'blocos' | 'livre'
+  produtividade: 1 | 2 | 3 | 4 | 5 // escala de 1 a 5
+  notas?: string
+}
+
+================
+File: app/globals.css
+================
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+
+  body {
+    @apply text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400;
+  }
+  
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 transition-all duration-200;
+  }
+  
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus-ring;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100;
+  }
+  
+  .input {
+    @apply px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus-ring;
+  }
+}
+
+================
+File: app/layout.tsx
+================
+import type { Metadata } from 'next'
+import './globals.css'
+import { Sidebar } from '@/app/components/layout/Sidebar'
+import { Header } from '@/app/components/layout/Header'
+import { Providers } from '@/app/providers'
+
+export const metadata: Metadata = {
+  title: 'Painel de Produtividade para Neurodivergentes',
+  description: 'Aplicativo para ajudar pessoas neurodivergentes com organização e produtividade',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="bg-white dark:bg-gray-900">
+        <Providers>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <Header />
+              <main className="flex-1 overflow-y-auto p-4 md:p-6">
+                {children}
+              </main>
+            </div>
+          </div>
+        </Providers>
+      </body>
+    </html>
+  )
+}
+
+================
+File: app/page.tsx
+================
+import { Card } from '@/app/components/ui/Card'
+import { PainelDia } from '@/app/components/inicio/PainelDia'
+import { ListaPrioridades } from '@/app/components/inicio/ListaPrioridades'
+import { LembretePausas } from '@/app/components/inicio/LembretePausas'
+
+export default function HomePage() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Início</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Painel Visual do Dia */}
+        <div className="md:col-span-2">
+          <Card title="Painel do Dia">
+            <PainelDia />
+          </Card>
+        </div>
+        
+        {/* Lista de Prioridades */}
+        <div>
+          <Card title="Prioridades do Dia">
+            <ListaPrioridades />
+          </Card>
+        </div>
+      </div>
+      
+      {/* Lembretes de Pausas */}
+      <Card title="Lembretes de Pausas">
+        <LembretePausas />
+      </Card>
+    </div>
+  )
+}
+
+================
+File: app/providers.tsx
+================
+'use client'
+
+import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { type ThemeProviderProps } from 'next-themes/dist/types'
+
+export function Providers({ children, ...props }: ThemeProviderProps) {
+  return (
+    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem {...props}>
+      {children}
+    </NextThemesProvider>
+  )
+}
+
+================
+File: .windsurfrules
+================
+{
+  "rules": [
+    {
+      "name": "Simplicidade e Foco",
+      "description": "Priorize a simplicidade e o foco nas funcionalidades essenciais para neurodivergentes. Evite complexidades desnecessárias."
+    },
+    {
+      "name": "Estrutura Clara",
+      "description": "Mantenha uma estrutura de código clara e previsível, seguindo os princípios de 'Convenção sobre Configuração'."
+    },
+    {
+      "name": "Componentes Atômicos",
+      "description": "Desenvolva componentes pequenos e reutilizáveis com propósito único, facilitando a manutenção e compreensão do código."
+    },
+    {
+      "name": "Acessibilidade Integrada",
+      "description": "Implemente ARIA labels e suporte a navegação por teclado desde o início do desenvolvimento."
+    },
+    {
+      "name": "Feedback Visual Rápido",
+      "description": "Garanta que todas as ações do usuário tenham retorno visual imediato para melhorar a experiência de uso."
+    },
+    {
+      "name": "Consistência Visual",
+      "description": "Utilize um sistema de design simplificado com tokens claros para manter a consistência visual em toda a aplicação."
+    },
+    {
+      "name": "Gerenciamento de Estado Simplificado",
+      "description": "Use Zustand para gerenciamento de estado, mantendo a API simples e reduzindo boilerplate."
+    },
+    {
+      "name": "Armazenamento Local",
+      "description": "Implemente persistência local usando localStorage via middleware do Zustand."
+    },
+    {
+      "name": "Estruturas de Dados Simples",
+      "description": "Utilize JSON simples e estruturas de dados planas sempre que possível para facilitar o gerenciamento de dados."
+    },
+    {
+      "name": "Estilização Consistente",
+      "description": "Aplique Tailwind CSS para estilização, mantendo a consistência e reduzindo decisões de design."
+    },
+    {
+      "name": "Ícones Minimalistas",
+      "description": "Utilize Lucide ou Phosphor Icons para manter um conjunto de ícones consistente e minimalista."
+    },
+    {
+      "name": "Desenvolvimento Gradual",
+      "description": "Inicie com mockups estáticos e adicione interatividade gradualmente, seguindo a ordem de implementação priorizada."
+    },
+    {
+      "name": "Documentação Concisa",
+      "description": "Mantenha documentação inline com comentários sucintos e claros para facilitar a compreensão do código."
+    },
+    {
+      "name": "Testes de Usabilidade",
+      "description": "Realize testes frequentes com usuários neurodivergentes para garantir que a interface atenda às suas necessidades específicas."
+    },
+    {
+      "name": "Otimização de Performance",
+      "description": "Priorize a performance da aplicação, evitando animações pesadas ou processamentos complexos que possam causar atrasos."
+    }
+  ]
+}
+
+================
+File: mvp.txt
+================
+# 🎯 Painel de Produtividade para Neurodivergentes - Versão Simplificada (MVP)
+
+## 📋 Visão Geral
+
+Este documento descreve uma versão simplificada (MVP) do painel de produtividade focado em pessoas neurodivergentes, especialmente com TDAH. O objetivo é criar uma experiência focada nas necessidades específicas deste público com apenas as funcionalidades essenciais.
+
+## 🔑 Princípios Orientadores
+
+1. **Simplicidade Acima de Tudo**: Menos é mais.
+2. **Foco no Essencial**: Apenas funcionalidades que agregam valor imediato.
+3. **Redução de Sobrecarga Cognitiva**: Interfaces claras e previsíveis.
+4. **Estímulos Visuais Adequados**: Uso estratégico de cores e ícones.
+5. **Lembretes e Estrutura**: Apoio para funções executivas.
+
+## 📱 Layout e Estrutura
+
+### Estrutura de Páginas
+- **Início**: Dashboard com visão geral e lembretes
+- **Alimentação**: Controle e planejamento de refeições
+- **Estudos**: Organização e técnicas de aprendizado
+- **Saúde**: Monitoramento de bem-estar e medicações
+- **Lazer**: Atividades recreativas e descanso
+
+### Navegação
+- Menu lateral com ícones grandes e coloridos
+- Barra superior minimalista com apenas:
+  - Nome do usuário/perfil
+  - Alternador de tema claro/escuro
+  - Botão de ajuda rápida
+
+## ⚙️ Funcionalidades por Seção
+
+### 1. Início
+- **Painel Visual do Dia**: Exibição em blocos de tempo com códigos de cores
+- **Lembretes de Pausas**: Alertas suaves para alternar tarefas a cada 25-30 minutos
+- **Lista de Prioridades**: Máximo de 3 tarefas principais destacadas para o dia
+
+### 2. Alimentação
+- **Planejador de Refeições**: Template simples com opções de horários e lembrete
+- **Registro Visual**: Fotos simples de refeições ou seleção de ícones (sem contagem calórica)
+- **Lembretes de Hidratação**: Acompanhamento simplificado de ingestão de água
+
+### 3. Estudos
+- **Temporizador Pomodoro Adaptado**: Sessões customizáveis (15-25 min) com intervalos claros
+- **Organizador de Materiais**: Lista visual de recursos de estudo com progresso visual
+- **Notas de Estudo Estruturadas**: Templates com sugestões para diferentes tipos de estudo
+
+### 4. Saúde
+- **Rastreador de Medicação**: Sistema de lembretes simples (sim/não) para medicações
+- **Monitor de Humor**: Check-in visual diário (3-5 opções, sem texto extenso)
+- **Lembretes de Movimento**: Sugestões periódicas para alongamentos ou caminhadas curtas
+
+### 5. Lazer
+- **Banco de Atividades**: Lista de opções de lazer para momentos de dificuldade de escolha
+- **Temporizador de Descompressão**: Ferramenta para sinalizar início/fim de descanso
+- **Limitador de Tempo**: Ajuda para evitar hiperfoco em atividades recreativas
+
+## 🎨 Design e UI
+
+### Cores
+- Esquema de cores consistente para cada seção
+- Alto contraste para melhor legibilidade
+- Opção de modo reduzido de estimulação visual
+
+### Componentes
+- Botões grandes com ícones e texto
+- Cards simples com bordas coloridas por categoria
+- Feedback visual e sonoro para ações completas
+
+## 📊 Dados e Armazenamento
+
+- Armazenamento local (localStorage) para MVP
+- Estruturas de dados simples e independentes para cada módulo
+- Opção para exportar dados em formato de texto simples
+
+## ⏱️ Implementação Priorizada
+
+1. **Semana 1**: Estrutura básica e navegação
+2. **Semana 2**: Módulos Início e Alimentação
+3. **Semana 3**: Módulos Estudos e Saúde
+4. **Semana 4**: Módulo Lazer e integração
+
+## 🚫 O que NÃO incluir
+
+- Análises complexas ou gráficos detalhados
+- Integrações com múltiplas plataformas
+- Notificações invasivas ou frequentes
+- Recursos que exigem múltiplos cliques/etapas
+- Textos longos ou instruções complexas
+
+## 💡 Estratégias Específicas para Neurodivergentes
+
+- **Redução de Estímulos**: Opção para desativar animações e reduzir cores
+- **Consistência**: Mesma estrutura e padrões em todos os módulos
+- **Previsibilidade**: Sequências claras de ações com resultado visível
+- **Microtarefas**: Divisão clara de atividades em passos muito pequenos
+- **Recompensa Visual**: Animações sutis e positivas para tarefas concluídas
+
+## 🛠️ Stack Tecnológica Recomendada
+
+### Frontend
+- **Framework**: Next.js (App Router) - estrutura previsível e simples
+- **Estilização**: Tailwind CSS - reduz decisões de design e mantém consistência
+- **Componentes**: Headless UI - acessibilidade embutida, menos código para gerenciar
+- **Ícones**: Lucide ou Phosphor Icons - conjunto consistente e minimalista
+
+### Estado e Armazenamento
+- **Gerenciamento de Estado**: Zustand - API simples, menos boilerplate que Redux
+- **Persistência Local**: localStorage via Zustand middleware
+- **Formato de Dados**: JSON simples, estruturas planas sempre que possível
+
+### Ferramentas de Desenvolvimento
+- **Linting**: ESLint com configurações mínimas necessárias
+- **Formatação**: Prettier com configuração padrão
+
+### Princípios de Implementação
+- **Convenção sobre Configuração**: Usar padrões estabelecidos
+- **Components Atômicos**: Componentes pequenos e reutilizáveis com propósito único
+- **Consistência Visual**: Sistema de design simplificado com tokens claros
+- **Feedback Imediato**: Retorno visual rápido para ações do usuário
+- **Acessibilidade**: ARIA labels e suporte a navegação por teclado integrados desde o início
+
+### Abordagem de Desenvolvimento
+- Começar com mockups estáticos e adicionar interatividade gradualmente
+- Documentação inline com comentários sucintos e claros
+
+================
+File: next-env.d.ts
+================
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/basic-features/typescript for more information.
+
+================
+File: package.json
+================
+{
+  "name": "painel-neurodivergentes",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "lucide-react": "^0.294.0",
+    "next": "14.0.4",
+    "next-themes": "^0.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.17",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "14.0.4",
+    "postcss": "^8.4.32",
+    "prettier": "^3.1.1",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3"
+  }
+}
+
+================
+File: postcss.config.js
+================
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+================
+File: README.md
+================
+# Painel de Produtividade para Neurodivergentes
+
+Este projeto implementa um painel de produtividade focado em pessoas neurodivergentes, especialmente com TDAH, seguindo princípios de simplicidade, foco e redução de sobrecarga cognitiva.
+
+## Estrutura do Projeto
+
+O projeto segue uma estrutura clara e previsível usando Next.js com App Router:
+
+```
+/app
+  /[seção]
+    /page.tsx      # Página principal de cada seção
+    /components    # Componentes específicos da seção
+  /components      # Componentes compartilhados
+  /hooks           # Hooks personalizados
+  /lib             # Utilitários e configurações
+  /store           # Gerenciamento de estado com Zustand
+  /styles          # Estilos globais
+  /types           # Definições de tipos TypeScript
+```
+
+## Princípios de Desenvolvimento
+
+- **Simplicidade Acima de Tudo**: Menos é mais
+- **Foco no Essencial**: Apenas funcionalidades que agregam valor imediato
+- **Redução de Sobrecarga Cognitiva**: Interfaces claras e previsíveis
+- **Estímulos Visuais Adequados**: Uso estratégico de cores e ícones
+- **Lembretes e Estrutura**: Apoio para funções executivas
+
+## Tecnologias
+
+- **Framework**: Next.js (App Router)
+- **Estilização**: Tailwind CSS
+- **Componentes**: Headless UI
+- **Ícones**: Lucide ou Phosphor Icons
+- **Gerenciamento de Estado**: Zustand com persistência local
+
+## Instalação
+
+```bash
+npm install
+npm run dev
+```
+
+## Seções do Aplicativo
+
+1. **Início**: Dashboard com visão geral e lembretes
+2. **Alimentação**: Controle e planejamento de refeições
+3. **Estudos**: Organização e técnicas de aprendizado
+4. **Saúde**: Monitoramento de bem-estar e medicações
+5. **Lazer**: Atividades recreativas e descanso
+
+================
+File: start.sh
+================
+#!/bin/bash
+cd "$(dirname "$0")"
+npm run dev
+
+================
+File: tailwind.config.js
+================
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Cores para cada seção, com alto contraste para melhor legibilidade
+        inicio: {
+          primary: '#4F46E5', // Indigo
+          secondary: '#818CF8',
+          light: '#EEF2FF',
+        },
+        alimentacao: {
+          primary: '#10B981', // Esmeralda
+          secondary: '#34D399',
+          light: '#ECFDF5',
+        },
+        estudos: {
+          primary: '#F59E0B', // Âmbar
+          secondary: '#FBBF24',
+          light: '#FFFBEB',
+        },
+        saude: {
+          primary: '#EF4444', // Vermelho
+          secondary: '#F87171',
+          light: '#FEF2F2',
+        },
+        lazer: {
+          primary: '#8B5CF6', // Violeta
+          secondary: '#A78BFA',
+          light: '#F5F3FF',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+      borderRadius: {
+        'xl': '1rem',
+        '2xl': '1.5rem',
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+    },
+  },
+  plugins: [],
+}
+
+================
+File: tsconfig.json
+================
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+
+
+
+================================================================
+End of Codebase
+================================================================
