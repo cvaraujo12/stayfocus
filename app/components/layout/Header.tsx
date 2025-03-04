@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Menu, X, Sun, Moon, HelpCircle } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Sidebar } from './Sidebar'
+import Image from 'next/image'
 
 export function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -43,7 +44,18 @@ export function Header() {
             >
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
-            <h1 className="ml-3 text-xl font-bold text-gray-900 dark:text-white">Painel ND</h1>
+            <div className="ml-3 flex items-center">
+              <Image
+                src="/images/logo.svg"
+                alt="Painel ND Logo"
+                width={32}
+                height={32}
+                priority
+                className="h-8 w-auto"
+                aria-label="Logo do Painel ND"
+              />
+              <span className="sr-only">Painel ND</span>
+            </div>
           </div>
 
           {/* Controles */}

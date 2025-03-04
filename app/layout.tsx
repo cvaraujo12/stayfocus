@@ -4,8 +4,16 @@ import { Header } from '@/app/components/layout/Header'
 import { Providers } from '@/app/providers'
 
 export const metadata: Metadata = {
-  title: 'Painel de Produtividade para Neurodivergentes',
+  title: 'Painel ND',
   description: 'Aplicativo para ajudar pessoas neurodivergentes com organização e produtividade',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.png', type: 'image/png' }
+    ],
+    apple: '/images/logo.svg',
+  },
 }
 
 export default function RootLayout({
