@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Header } from '@/app/components/layout/Header'
+import { Footer } from '@/app/components/layout/Footer'
 import { Providers } from '@/app/providers'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
-  title: 'Painel ND',
+  title: 'StayFocus',
   description: 'Aplicativo para ajudar pessoas neurodivergentes com organização e produtividade',
   icons: {
     icon: [
@@ -30,10 +32,12 @@ export default function RootLayout({
               <Header />
               <main className="flex-1 overflow-y-auto p-4">
                 {children}
+                <Footer />
               </main>
             </div>
           </div>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   )

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Utensils, BookOpen, Heart, Smile, X } from 'lucide-react'
+import { Home, Utensils, BookOpen, Heart, Smile, DollarSign, Rocket, X } from 'lucide-react'
 
 type NavItem = {
   name: string
@@ -10,6 +10,7 @@ type NavItem = {
   icon: React.ElementType
   color: string
   activeColor: string
+  iconClasses?: string
 }
 
 const navItems: NavItem[] = [
@@ -47,6 +48,20 @@ const navItems: NavItem[] = [
     icon: Smile,
     color: 'text-lazer-primary',
     activeColor: 'bg-lazer-light',
+  },
+  {
+    name: 'Finanças',
+    href: '/financas',
+    icon: DollarSign,
+    color: 'text-financas-primary',
+    activeColor: 'bg-financas-light',
+  },
+  {
+    name: 'Hiperfocos',
+    href: '/hiperfocos',
+    icon: Rocket,
+    color: 'text-hiperfocos-primary',
+    activeColor: 'bg-hiperfocos-light',
   },
 ]
 
@@ -97,7 +112,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                   onClick={onClose}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
+                  <item.icon className={`mr-3 h-5 w-5 ${item.iconClasses || ''}`} aria-hidden="true" />
                   {item.name}
                 </Link>
               )

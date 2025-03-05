@@ -34,6 +34,32 @@ module.exports = {
           secondary: '#A78BFA',
           light: '#F5F3FF90', // Reduzida opacidade para suavizar
         },
+        financas: {
+          primary: '#0EA5E9', // Azul céu
+          secondary: '#38BDF8',
+          light: '#E0F2FE90', // Reduzida opacidade para suavizar
+        },
+        hiperfocos: {
+          primary: '#F97316', // Laranja intenso
+          secondary: '#FB923C',
+          light: '#FFF7ED90', // Reduzida opacidade para suavizar
+        },
+        sono: {
+          primary: '#5D4DB2', // Roxo azulado (lembrando noite)
+          secondary: '#7B6DC3',
+          light: '#EDE9FF90', // Reduzida opacidade para suavizar
+        },
+        perfil: {
+          primary: '#3B82F6', // Azul (representando identidade/personalização)
+          secondary: '#60A5FA',
+          light: '#EFF6FF90', // Reduzida opacidade para suavizar
+        },
+        autoconhecimento: {
+          primary: '#6B7280', // Cinza azulado (calma, reflexão)
+          secondary: '#9CA3AF',
+          light: '#F9FAFB90', // Reduzida opacidade para suavizar
+          hover: '#4B5563', // Versão mais escura para hover
+        },
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Menu, X, Sun, Moon, HelpCircle } from 'lucide-react'
+import { Menu, X, Sun, Moon, HelpCircle, Anchor } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Sidebar } from './Sidebar'
-import Image from 'next/image'
 import Link from 'next/link'
 
 export function Header() {
@@ -46,21 +45,49 @@ export function Header() {
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
             <div className="ml-3 flex items-center">
-              <Image
-                src="/images/logo.svg"
-                alt="Painel ND Logo"
-                width={32}
-                height={32}
-                priority
-                className="h-8 w-auto"
-                aria-label="Logo do Painel ND"
-              />
-              <span className="sr-only">Painel ND</span>
+              <span className="sr-only">StayFocus</span>
             </div>
           </div>
 
           {/* Controles */}
           <div className="flex items-center space-x-3">
+            {/* Ícone Zzz para Sono */}
+            <Link href="/sono">
+              <button
+                className="p-2 rounded-full text-sono-primary hover:bg-sono-light focus:outline-none focus:ring-2 focus:ring-sono-primary"
+                aria-label="Gestão do Sono"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  className="h-5 w-5"
+                >
+                  <path d="M2 4v16"></path>
+                  <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                  <path d="M2 17h20"></path>
+                  <path d="M6 8v9"></path>
+                </svg>
+              </button>
+            </Link>
+            
+            {/* Ícone de Âncora para Autoconhecimento */}
+            <Link href="/autoconhecimento">
+              <button
+                className="p-2 rounded-full text-autoconhecimento-primary hover:bg-autoconhecimento-light focus:outline-none focus:ring-2 focus:ring-autoconhecimento-primary"
+                aria-label="Notas de Autoconhecimento"
+              >
+                <Anchor className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </Link>
+            
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
@@ -85,9 +112,14 @@ export function Header() {
             </Link>
 
             {/* User profile */}
-            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">U</span>
-            </div>
+            <Link href="/perfil">
+              <button 
+                className="h-8 w-8 rounded-full bg-perfil-primary hover:bg-perfil-secondary text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-perfil-primary"
+                aria-label="Informações Pessoais"
+              >
+                <span className="text-sm font-medium">U</span>
+              </button>
+            </Link>
           </div>
         </div>
       </header>

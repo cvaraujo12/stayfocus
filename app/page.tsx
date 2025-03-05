@@ -2,6 +2,7 @@ import { Card } from '@/app/components/ui/Card'
 import { PainelDia } from '@/app/components/inicio/PainelDia'
 import { ListaPrioridades } from '@/app/components/inicio/ListaPrioridades'
 import { LembretePausas } from '@/app/components/inicio/LembretePausas'
+import { ChecklistMedicamentos } from '@/app/components/inicio/ChecklistMedicamentos'
 
 export default function HomePage() {
   return (
@@ -19,7 +20,15 @@ export default function HomePage() {
         {/* Lista de Prioridades */}
         <div>
           <Card title="Prioridades do Dia">
-            <ListaPrioridades />
+            <div className="space-y-6">
+              <ListaPrioridades />
+              
+              {/* Separador */}
+              <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+              
+              {/* Checklist de Medicamentos Diários */}
+              <ChecklistMedicamentos />
+            </div>
           </Card>
         </div>
       </div>

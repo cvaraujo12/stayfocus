@@ -17,6 +17,55 @@
     @apply text-gray-900 dark:text-white;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Estilos para acessibilidade */
+  .alto-contraste {
+    --contrast-factor: 1.5;
+  }
+  
+  .alto-contraste .text-gray-500,
+  .alto-contraste .text-gray-400,
+  .alto-contraste .text-gray-300 {
+    @apply text-gray-900 dark:text-white;
+  }
+  
+  .alto-contraste .bg-gray-50,
+  .alto-contraste .bg-gray-100,
+  .alto-contraste .bg-gray-200 {
+    @apply bg-white dark:bg-gray-900;
+  }
+  
+  .reducao-estimulos * {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .reducao-estimulos .bg-opacity-90,
+  .reducao-estimulos .bg-opacity-80,
+  .reducao-estimulos .bg-opacity-70 {
+    @apply bg-opacity-100;
+  }
+  
+  .texto-grande {
+    font-size: 1.1rem;
+  }
+  
+  .texto-grande h1 {
+    font-size: 2.5rem;
+  }
+  
+  .texto-grande h2 {
+    font-size: 2rem;
+  }
+  
+  .texto-grande h3 {
+    font-size: 1.5rem;
+  }
+  
+  .texto-grande input,
+  .texto-grande button {
+    font-size: 1.1rem;
+  }
 }
 
 @layer components {
