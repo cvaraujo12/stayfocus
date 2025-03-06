@@ -18,6 +18,22 @@ const nextConfig = {
         hostname: 'lh3.googleusercontent.com',
       }
     ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/auth',
+        destination: '/auth/login',
+        permanent: true,
+      }
+    ]
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Adicione quaisquer reescritas de URL necessárias aqui
+      ]
+    }
   }
 }
 

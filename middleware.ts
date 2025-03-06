@@ -2,11 +2,19 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Rotas que não requerem autenticação
-const publicRoutes = ['/auth/login', '/auth/callback']
+const publicRoutes = ['/auth/login', '/auth/callback', '/']
+
+// Rotas que são parte do sistema de autenticação
+const authRoutes = ['/auth/login', '/auth/callback']
 
 // Verifica se a rota atual é pública
 const isPublicRoute = (pathname: string) => {
-  return publicRoutes.some(route => pathname.startsWith(route))
+  return publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
+}
+
+// Verifica se a rota atual é de autenticação
+const isAuthRoute = (pathname: string) => {
+  return authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 }
 
 export async function middleware(request: NextRequest) {
@@ -63,10 +71,10 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     // Se estiver autenticado e tentar acessar páginas de auth
-    if (pathname.startsWith('/auth')) {
+    if (isAuthRoute(pathname)) {
       // Verifica se há uma URL de redirecionamento
       const nextUrl = request.nextUrl.searchParams.get('next')
-      if (nextUrl && !nextUrl.startsWith('/auth')) {
+      if (nextUrl && !isAuthRoute(nextUrl)) {
         return NextResponse.redirect(new URL(nextUrl, request.url))
       }
       // Se não houver, redireciona para home
