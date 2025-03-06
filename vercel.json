@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "POSTGRES_URL": "@postgres_url",
+    "POSTGRES_PRISMA_URL": "@postgres_prisma_url",
+    "POSTGRES_URL_NON_POOLING": "@postgres_url_non_pooling",
+    "POSTGRES_USER": "@postgres_user",
+    "POSTGRES_PASSWORD": "@postgres_password",
+    "POSTGRES_DATABASE": "@postgres_database",
+    "POSTGRES_HOST": "@postgres_host",
+    "SUPABASE_JWT_SECRET": "@supabase_jwt_secret",
+    "SUPABASE_ANON_KEY": "@supabase_anon_key"
+  }
+} 

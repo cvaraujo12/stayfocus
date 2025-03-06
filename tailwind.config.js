@@ -53,6 +53,9 @@ module.exports = {
           primary: '#3B82F6', // Azul (representando identidade/personalização)
           secondary: '#60A5FA',
           light: '#EFF6FF90', // Reduzida opacidade para suavizar
+          hover: '#2563EB', // Azul mais escuro para hover
+          focus: '#1D4ED8', // Azul ainda mais escuro para focus
+          border: '#93C5FD', // Azul claro para bordas
         },
         autoconhecimento: {
           primary: '#6B7280', // Cinza azulado (calma, reflexão)
@@ -60,6 +63,25 @@ module.exports = {
           light: '#F9FAFB90', // Reduzida opacidade para suavizar
           hover: '#4B5563', // Versão mais escura para hover
         },
+        // Cores específicas para autenticação com alto contraste e acessibilidade
+        auth: {
+          primary: '#2563EB', // Azul escuro para melhor contraste
+          secondary: '#60A5FA',
+          accent: '#F59E0B', // Amarelo âmbar para destaques
+          error: '#DC2626', // Vermelho para erros
+          success: '#059669', // Verde para sucesso
+          border: '#E5E7EB',
+          text: {
+            primary: '#111827',
+            secondary: '#4B5563',
+            muted: '#6B7280',
+          },
+          background: {
+            primary: '#FFFFFF',
+            secondary: '#F9FAFB',
+            muted: '#F3F4F6',
+          }
+        }
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
@@ -70,7 +92,17 @@ module.exports = {
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'fade-in': 'fadeIn 0.5s ease-in-out',
       },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      boxShadow: {
+        'auth': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      }
     },
   },
   plugins: [],

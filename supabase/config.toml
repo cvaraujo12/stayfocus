@@ -1,0 +1,45 @@
+[auth]
+site_url = "https://stayfocus.vercel.app"
+additional_redirect_urls = ["https://stayfocus.vercel.app/auth/callback"]
+autoconfirm = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[auth.external.github]
+enabled = true
+client_id = ""
+secret = ""
+redirect_uri = "https://stayfocus.vercel.app/auth/callback"
+
+[auth.external.google]
+enabled = true
+client_id = ""
+secret = ""
+redirect_uri = "https://stayfocus.vercel.app/auth/callback"
+
+[postgres]
+host = "db.psscjeykwkrebqnzaycx.supabase.co"
+port = 5432
+database = "postgres"
+user = "postgres"
+password = "OvikDFcEDsBA0mEb"
+
+[api]
+port = 54321
+schemas = ["public", "storage", "auth"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[studio]
+port = 54323
+
+[inbucket]
+port = 54324
+smtp_port = 54325
+pop3_port = 54326
+
+[storage]
+file_size_limit = "50MiB" 
