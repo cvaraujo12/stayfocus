@@ -86,6 +86,9 @@ interface AppState extends SyncState {
   medicamentos: Medicamento[]
   registrosHumor: RegistroHumor[]
   
+  // Função para resetar o estado
+  resetState: () => void
+  
   // Ações para tarefas
   adicionarTarefa: (tarefa: Omit<Tarefa, 'id'>) => void
   removerTarefa: (id: string) => void
@@ -142,7 +145,7 @@ const tableMapping: Record<string, keyof PersistedState> = {
 
 // Configuração de persistência
 const persistConfig: PersistOptions<AppState, PersistedState> = {
-  name: 'stayfocus-storage',
+  name: `stayfocus-storage-${supabase.auth.getUser()?.then(res => res.data.user?.id) || 'anonymous'}`,
   partialize: (state) => ({
     tarefas: state.tarefas,
     blocosTempo: state.blocosTempo,
@@ -172,6 +175,52 @@ const isOnline = async (): Promise<boolean> => {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get, api) => {
+      // Função para limpar o estado
+      const resetState: () => void = () => {
+        const initialState = {
+          tarefas: [],
+          blocosTempo: [],
+          refeicoes: [],
+          medicacoes: [],
+          medicamentos: [],
+          registrosHumor: [],
+          configuracao: {
+            tempoFoco: 25,
+            tempoPausa: 5,
+            temaEscuro: false,
+            reducaoEstimulos: false
+          },
+          connectionStatus: 'checking' as ConnectionStatus,
+          lastSyncedAt: null,
+          pendingChanges: {},
+          checkConnection: get().checkConnection
+        };
+        set({ ...initialState, resetState });
+      };
+      // Estado inicial com a função resetState
+      const initialState = {
+        tarefas: [],
+        blocosTempo: [],
+        refeicoes: [],
+        medicacoes: [],
+        medicamentos: [],
+        registrosHumor: [],
+        configuracao: {
+          tempoFoco: 25,
+          tempoPausa: 5,
+          temaEscuro: false,
+          reducaoEstimulos: false
+        },
+        connectionStatus: 'checking' as ConnectionStatus,
+        lastSyncedAt: null,
+        pendingChanges: {},
+        checkConnection: async () => isOnline(),
+        resetState
+      };
+
+      // Define o estado inicial
+      set(initialState);
+
       // Função para sincronizar o estado com o Supabase
       const syncStateToSupabase = async (state: AppState): Promise<void> => {
         try {

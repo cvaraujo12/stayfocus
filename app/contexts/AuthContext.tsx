@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import { getCurrentUser, signOut } from '@/supabase/auth';
+import { useAppStore } from '../store';
 
 // Definição do tipo para o contexto de autenticação
 type AuthContextType = {
@@ -32,6 +33,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Função para limpar o estado do usuário
+  const clearUserState = () => {
+    // Limpa o estado do Zustand
+    useAppStore.getState().resetState();
+
+    // Limpa o localStorage
+    if (typeof window !== 'undefined') {
+      const storagePrefix = 'stayfocus-storage';
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(storagePrefix)) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+  };
 
   // Função para obter o usuário atual
   const refreshUser = async () => {
@@ -65,7 +83,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await signOut();
       
       if (result && result.success) {
+        // Limpa o estado do usuário
         setUser(null);
+        clearUserState();
+
+        // Redireciona para a página de login
         router.push('/login');
       } else if (result) {
         setError(result.message);
@@ -95,6 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Limpar o intervalo ao desmontar o componente
     return () => clearInterval(interval);
   }, []);
+
+  // Efeito para atualizar o estado quando o usuário mudar
+  useEffect(() => {
+    if (!user) {
+      // Se não houver usuário, limpa o estado
+      clearUserState();
+    }
+  }, [user]);
 
   // Valores fornecidos pelo contexto
   const value = {
