@@ -5,6 +5,7 @@ import { Menu, X, Sun, Moon, HelpCircle, Anchor } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Sidebar } from './Sidebar'
 import Link from 'next/link'
+import SyncStatus from '../SyncStatus'
 
 export function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -47,6 +48,11 @@ export function Header() {
             <div className="ml-3 flex items-center">
               <span className="sr-only">StayFocus</span>
             </div>
+          </div>
+
+          {/* Status de sincronização */}
+          <div className="hidden md:flex">
+            <SyncStatus />
           </div>
 
           {/* Controles */}
@@ -121,6 +127,11 @@ export function Header() {
               </button>
             </Link>
           </div>
+        </div>
+        
+        {/* Status de sincronização para mobile */}
+        <div className="md:hidden px-4 pb-2">
+          <SyncStatus />
         </div>
       </header>
     </>
