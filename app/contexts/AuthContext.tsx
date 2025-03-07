@@ -39,13 +39,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       const result = await getCurrentUser();
       
-      if (result.success) {
+      if (result && result.success) {
         setUser(result.user);
-      } else {
+      } else if (result) {
         setUser(null);
         if (result.message !== 'Nenhum usuário autenticado') {
           setError(result.message);
         }
+      } else {
+        setUser(null);
+        setError('Erro ao obter dados do usuário');
       }
     } catch (error) {
       console.error('Erro ao obter usuário:', error);
@@ -61,11 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       const result = await signOut();
       
-      if (result.success) {
+      if (result && result.success) {
         setUser(null);
         router.push('/login');
-      } else {
+      } else if (result) {
         setError(result.message);
+      } else {
+        setError('Erro ao fazer logout');
       }
     } catch (error) {
       console.error('Erro ao fazer logout:', error);

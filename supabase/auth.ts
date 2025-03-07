@@ -1,23 +1,74 @@
 import { supabase } from './client';
+import { AuthError, Session } from '@supabase/supabase-js';
+
+type Provider = 'github' | 'google';
 
 /**
  * Realiza login com email e senha
  * @param email Email do usuário
  * @param password Senha do usuário
- * @returns Dados do usuário autenticado
+ * @returns Objeto com dados do usuário ou mensagem de erro
  */
 export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+      return {
+        success: false,
+        message: error.message,
+        user: null,
+        session: null
+      };
+    }
+    
+    if (data.session) {
+      await storeSessionSecurely(data.session);
+    }
+    
+    return {
+      success: true,
+      message: 'Login realizado com sucesso',
+      user: data.user,
+      session: data.session
+    };
+  } catch (error) {
+    console.error('Erro ao fazer login:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Erro ao fazer login',
+      user: null,
+      session: null
+    };
+  }
 }
 
 /**
  * Realiza logout do usuário atual
+ * @returns Objeto indicando sucesso ou falha
  */
 export async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  try {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      return {
+        success: false,
+        message: error.message
+      };
+    }
+    
+    return {
+      success: true,
+      message: 'Logout realizado com sucesso'
+    };
+  } catch (error) {
+    console.error('Erro ao fazer logout:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Erro desconhecido'
+    };
+  }
 }
 
 /**
@@ -105,6 +156,30 @@ async function storeSessionSecurely(session: Session) {
 }
 
 /**
+ * Atualiza a sessão atual para evitar expiração do token
+ * @returns Resultado da operação de refresh
+ */
+async function refreshSession() {
+  try {
+    const { data, error } = await supabase.auth.refreshSession();
+    
+    if (error) {
+      console.error('Erro ao atualizar sessão:', error);
+      return false;
+    }
+    
+    if (data.session) {
+      await storeSessionSecurely(data.session);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar sessão:', error);
+    return false;
+  }
+}
+
+/**
  * Realiza login com GitHub
  * @param options Opções adicionais para autenticação
  * @returns Dados da autenticação ou erro
@@ -119,11 +194,8 @@ export async function signInWithGitHub(options: Record<string, any> = {}) {
       throw error;
     }
     
-    // Armazena metadados da sessão se disponível
-    if (data.session) {
-      await storeSessionSecurely(data.session);
-    }
-    
+    // O OAuth apenas inicia o fluxo e retorna uma URL para redirecionamento,
+    // não uma sessão imediata
     return { 
       success: true, 
       data, 
@@ -158,11 +230,8 @@ export async function signInWithGoogle(options: Record<string, any> = {}) {
       throw error;
     }
     
-    // Armazena metadados da sessão se disponível
-    if (data.session) {
-      await storeSessionSecurely(data.session);
-    }
-    
+    // O OAuth apenas inicia o fluxo e retorna uma URL para redirecionamento,
+    // não uma sessão imediata
     return { 
       success: true, 
       data, 
@@ -186,21 +255,81 @@ export async function signInWithGoogle(options: Record<string, any> = {}) {
  * Registra um novo usuário
  * @param email Email do usuário
  * @param password Senha do usuário
- * @returns Dados do usuário registrado
+ * @returns Objeto com dados do usuário registrado ou mensagem de erro
  */
 export async function signUp(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    
+    if (error) {
+      return {
+        success: false,
+        message: error.message,
+        user: null,
+        session: null
+      };
+    }
+    
+    if (data.session) {
+      await storeSessionSecurely(data.session);
+    }
+    
+    return {
+      success: true,
+      message: data.user?.identities?.length === 0 
+        ? 'Email já cadastrado. Tente fazer login.' 
+        : 'Cadastro realizado com sucesso! Verifique seu email para confirmar.',
+      user: data.user,
+      session: data.session
+    };
+  } catch (error) {
+    console.error('Erro ao cadastrar usuário:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Erro ao cadastrar usuário',
+      user: null,
+      session: null
+    };
+  }
 }
 
 /**
  * Obtém o usuário atual
- * @returns Dados do usuário atual ou null
+ * @returns Objeto com dados do usuário ou mensagem de erro
  */
 export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error) {
+      return {
+        success: false,
+        user: null,
+        message: error.message
+      };
+    }
+    
+    if (user) {
+      return {
+        success: true,
+        user,
+        message: 'Usuário autenticado'
+      };
+    }
+    
+    return {
+      success: false,
+      user: null,
+      message: 'Nenhum usuário autenticado'
+    };
+  } catch (error) {
+    console.error('Erro ao buscar usuário atual:', error);
+    return {
+      success: false,
+      user: null,
+      message: error instanceof Error ? error.message : 'Erro desconhecido'
+    };
+  }
 }
 
 /**

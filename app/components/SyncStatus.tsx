@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppStore } from '../store';
-import { CloudOff, CloudSync, CloudCheck, RefreshCw } from 'lucide-react';
+import { CloudOff, CloudCog, CheckCircle, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -14,11 +14,11 @@ export const SyncStatus: React.FC = () => {
   const getStatusIcon = () => {
     switch (connectionStatus) {
       case 'online':
-        return <CloudCheck className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'offline':
         return <CloudOff className="h-5 w-5 text-red-500" />;
       case 'checking':
-        return <CloudSync className="h-5 w-5 text-yellow-500 animate-spin" />;
+        return <CloudCog className="h-5 w-5 text-yellow-500 animate-spin" />;
       default:
         return null;
     }
