@@ -53,16 +53,18 @@ export function RegistroMedicamentos() {
       return
     }
     
-    adicionarMedicamento({
-      nome: novoMedicamento.nome,
-      dosagem: novoMedicamento.dosagem,
-      frequencia: novoMedicamento.frequencia,
-      horarios: [...novoMedicamento.horarios],
-      observacoes: novoMedicamento.observacoes,
-      dataInicio: novoMedicamento.dataInicio,
-      ultimaTomada: null,
-      intervalo: novoMedicamento.intervalo,
-    })
+    if (adicionarMedicamento) {
+      adicionarMedicamento({
+        nome: novoMedicamento.nome,
+        dosagem: novoMedicamento.dosagem,
+        frequencia: novoMedicamento.frequencia,
+        horarios: [...novoMedicamento.horarios],
+        observacoes: novoMedicamento.observacoes,
+        dataInicio: novoMedicamento.dataInicio,
+        ultimaTomada: null,
+        intervalo: novoMedicamento.intervalo,
+      })
+    }
     
     resetForm()
   }, [adicionarMedicamento, novoMedicamento])
@@ -95,15 +97,17 @@ export function RegistroMedicamentos() {
       return
     }
     
-    atualizarMedicamento(editandoId, {
-      nome: novoMedicamento.nome,
-      dosagem: novoMedicamento.dosagem,
-      frequencia: novoMedicamento.frequencia,
-      horarios: [...novoMedicamento.horarios],
-      observacoes: novoMedicamento.observacoes,
-      dataInicio: novoMedicamento.dataInicio,
-      intervalo: novoMedicamento.intervalo,
-    })
+    if (atualizarMedicamento) {
+      atualizarMedicamento(editandoId, {
+        nome: novoMedicamento.nome,
+        dosagem: novoMedicamento.dosagem,
+        frequencia: novoMedicamento.frequencia,
+        horarios: [...novoMedicamento.horarios],
+        observacoes: novoMedicamento.observacoes,
+        dataInicio: novoMedicamento.dataInicio,
+        intervalo: novoMedicamento.intervalo,
+      })
+    }
     
     resetForm()
   }, [atualizarMedicamento, editandoId, novoMedicamento])
@@ -134,7 +138,9 @@ export function RegistroMedicamentos() {
 
   const handleRegistrarTomada = useCallback((id: string) => {
     const agora = new Date().toISOString()
-    registrarTomadaMedicamento(id, agora)
+    if (registrarTomadaMedicamento) {
+      registrarTomadaMedicamento(id, agora)
+    }
   }, [registrarTomadaMedicamento])
 
   const resetForm = useCallback(() => {
@@ -309,7 +315,7 @@ export function RegistroMedicamentos() {
           <MedicamentosList
             medicamentos={medicamentos}
             onEdit={iniciarEdicao}
-            onDelete={removerMedicamento}
+            onDelete={(id) => removerMedicamento && removerMedicamento(id)}
             onRegistrarTomada={handleRegistrarTomada}
           />
         </Card>

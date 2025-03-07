@@ -71,7 +71,9 @@ export function ChecklistMedicamentos() {
   // Registrar tomada de medicamento
   const handleToggleTomado = (id: string) => {
     const dataHora = new Date().toISOString()
-    registrarTomadaMedicamento(id, dataHora)
+    if (registrarTomadaMedicamento) {
+      registrarTomadaMedicamento(id, dataHora)
+    }
   }
   
   // Se não houver medicamentos diários

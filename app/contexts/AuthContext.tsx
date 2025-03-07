@@ -37,7 +37,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Função para limpar o estado do usuário
   const clearUserState = () => {
     // Limpa o estado do Zustand
-    useAppStore.getState().resetState();
+    const storeState = useAppStore.getState();
+    if (storeState && storeState.resetState) {
+      storeState.resetState();
+    }
 
     // Limpa o localStorage
     if (typeof window !== 'undefined') {

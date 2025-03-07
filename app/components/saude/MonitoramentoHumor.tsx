@@ -46,12 +46,14 @@ export function MonitoramentoHumor() {
       return
     }
 
-    adicionarRegistroHumor({
-      data: novoRegistro.data,
-      nivel: novoRegistro.nivel,
-      fatores: [...novoRegistro.fatores],
-      notas: novoRegistro.notas,
-    })
+    if (adicionarRegistroHumor) {
+      adicionarRegistroHumor({
+        data: novoRegistro.data,
+        nivel: novoRegistro.nivel,
+        fatores: [...novoRegistro.fatores],
+        notas: novoRegistro.notas,
+      })
+    }
     
     resetForm()
   }, [adicionarRegistroHumor, novoRegistro])
@@ -73,12 +75,14 @@ export function MonitoramentoHumor() {
       return
     }
 
-    atualizarRegistroHumor(editandoId, {
-      data: novoRegistro.data,
-      nivel: novoRegistro.nivel,
-      fatores: [...novoRegistro.fatores],
-      notas: novoRegistro.notas,
-    })
+    if (atualizarRegistroHumor) {
+      atualizarRegistroHumor(editandoId, {
+        data: novoRegistro.data,
+        nivel: novoRegistro.nivel,
+        fatores: [...novoRegistro.fatores],
+        notas: novoRegistro.notas,
+      })
+    }
     
     resetForm()
   }, [atualizarRegistroHumor, editandoId, novoRegistro])
@@ -360,7 +364,7 @@ export function MonitoramentoHumor() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removerRegistroHumor(registro.id)}
+                        onClick={() => removerRegistroHumor && removerRegistroHumor(registro.id)}
                         aria-label="Remover registro"
                       >
                         <Trash className="h-4 w-4" />

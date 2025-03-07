@@ -8,7 +8,9 @@ export const SyncStatus: React.FC = () => {
   const { connectionStatus, lastSyncedAt, checkConnection, pendingChanges } = useAppStore();
   
   const handleSync = async () => {
-    await checkConnection();
+    if (checkConnection) {
+      await checkConnection();
+    }
   };
   
   const getStatusIcon = () => {
@@ -37,7 +39,7 @@ export const SyncStatus: React.FC = () => {
     }
   };
   
-  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+  const hasPendingChanges = Object.keys(pendingChanges || {}).length > 0;
   
   return (
     <div className="flex items-center space-x-2 text-sm">
@@ -54,7 +56,7 @@ export const SyncStatus: React.FC = () => {
       
       {hasPendingChanges && (
         <span className="text-yellow-500">
-          ({Object.keys(pendingChanges).length} alterações pendentes)
+          ({Object.keys(pendingChanges || {}).length} alterações pendentes)
         </span>
       )}
       

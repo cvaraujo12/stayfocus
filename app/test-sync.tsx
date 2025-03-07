@@ -19,7 +19,7 @@ export default function TestSync() {
   
   // Adicionar uma nova tarefa
   const handleAddTarefa = () => {
-    if (novaTarefa.trim()) {
+    if (novaTarefa.trim() && adicionarTarefa) {
       adicionarTarefa({
         texto: novaTarefa,
         concluida: false,
@@ -32,12 +32,16 @@ export default function TestSync() {
   
   // Remover uma tarefa
   const handleRemoveTarefa = (id: string) => {
-    removerTarefa(id);
+    if (removerTarefa) {
+      removerTarefa(id);
+    }
   };
   
   // Forçar verificação de conexão
   const handleCheckConnection = async () => {
-    await checkConnection();
+    if (checkConnection) {
+      await checkConnection();
+    }
   };
   
   return (
@@ -54,7 +58,7 @@ export default function TestSync() {
           <div>
             <p><strong>Status:</strong> {connectionStatus}</p>
             <p><strong>Última sincronização:</strong> {lastSyncedAt ? new Date(lastSyncedAt).toLocaleString() : 'Nunca'}</p>
-            <p><strong>Alterações pendentes:</strong> {Object.keys(pendingChanges).length}</p>
+            <p><strong>Alterações pendentes:</strong> {pendingChanges ? Object.keys(pendingChanges).length : 0}</p>
           </div>
           <div>
             <button
@@ -87,8 +91,8 @@ export default function TestSync() {
       </div>
       
       <div>
-        <h2 className="text-xl font-semibold mb-2">Tarefas ({tarefas.length})</h2>
-        {tarefas.length === 0 ? (
+        <h2 className="text-xl font-semibold mb-2">Tarefas ({(tarefas || []).length})</h2>
+        {(!tarefas || tarefas.length === 0) ? (
           <p className="text-gray-500">Nenhuma tarefa adicionada.</p>
         ) : (
           <ul className="space-y-2">

@@ -133,6 +133,18 @@ type PersistedState = Pick<AppState,
   'configuracao'
 >;
 
+type StoreState = Omit<AppState, keyof SyncState> & {
+  connectionStatus: ConnectionStatus;
+  lastSyncedAt: string | null;
+  pendingChanges: Record<string, any[]>;
+  checkConnection: () => Promise<boolean>;
+  resetState: () => void;
+};
+
+type StoreMethods = Pick<AppState, keyof SyncState>;
+
+type Store = StoreState & StoreMethods;
+
 // Mapeamento entre tabelas do Supabase e chaves do estado
 const tableMapping: Record<string, keyof PersistedState> = {
   'tarefas': 'tarefas',
@@ -144,17 +156,25 @@ const tableMapping: Record<string, keyof PersistedState> = {
 };
 
 // Configuração de persistência
-const persistConfig: PersistOptions<AppState, PersistedState> = {
+const persistConfig: PersistOptions<Partial<Store>, Partial<Store>> = {
   name: `stayfocus-storage-${supabase.auth.getUser()?.then(res => res.data.user?.id) || 'anonymous'}`,
-  partialize: (state) => ({
-    tarefas: state.tarefas,
-    blocosTempo: state.blocosTempo,
-    refeicoes: state.refeicoes,
-    medicacoes: state.medicacoes,
-    medicamentos: state.medicamentos,
-    registrosHumor: state.registrosHumor,
-    configuracao: state.configuracao,
-  }),
+  partialize: (state: Partial<Store>) => {
+    return {
+      tarefas: state.tarefas || [],
+      blocosTempo: state.blocosTempo || [],
+      refeicoes: state.refeicoes || [],
+      medicacoes: state.medicacoes || [],
+      medicamentos: state.medicamentos || [],
+      registrosHumor: state.registrosHumor || [],
+      configuracao: state.configuracao || {
+        tempoFoco: 25,
+        tempoPausa: 5,
+        temaEscuro: false,
+        reducaoEstimulos: false
+      },
+    };
+  },
+  version: 1,
 };
 
 // Função para verificar se o dispositivo está online
@@ -172,328 +192,96 @@ const isOnline = async (): Promise<boolean> => {
 };
 
 // Criação do store com integração direta do Supabase
-export const useAppStore = create<AppState>()(
-  persist(
-    (set, get, api) => {
-      // Função para limpar o estado
-      const resetState: () => void = () => {
-        const initialState = {
-          tarefas: [],
-          blocosTempo: [],
-          refeicoes: [],
-          medicacoes: [],
-          medicamentos: [],
-          registrosHumor: [],
-          configuracao: {
-            tempoFoco: 25,
-            tempoPausa: 5,
-            temaEscuro: false,
-            reducaoEstimulos: false
-          },
-          connectionStatus: 'checking' as ConnectionStatus,
-          lastSyncedAt: null,
-          pendingChanges: {},
-          checkConnection: get().checkConnection
-        };
-        set({ ...initialState, resetState });
-      };
-      // Estado inicial com a função resetState
-      const initialState = {
-        tarefas: [],
-        blocosTempo: [],
-        refeicoes: [],
-        medicacoes: [],
-        medicamentos: [],
-        registrosHumor: [],
-        configuracao: {
-          tempoFoco: 25,
-          tempoPausa: 5,
-          temaEscuro: false,
-          reducaoEstimulos: false
-        },
-        connectionStatus: 'checking' as ConnectionStatus,
-        lastSyncedAt: null,
-        pendingChanges: {},
-        checkConnection: async () => isOnline(),
-        resetState
-      };
-
-      // Define o estado inicial
-      set(initialState);
-
-      // Função para sincronizar o estado com o Supabase
-      const syncStateToSupabase = async (state: AppState): Promise<void> => {
-        try {
-          const userResponse = await supabase.auth.getUser();
-          const userId = userResponse.data?.user?.id || 'anonymous';
-          
-          for (const [tableName, stateKey] of Object.entries(tableMapping)) {
-            const data = state[stateKey];
-            if (Array.isArray(data) && data.length > 0) {
-              try {
-                const { error } = await supabase.from(tableName).upsert(
-                  data.map(item => ({ ...item, user_id: userId })),
-                  { onConflict: 'id' }
-                );
-                
-                if (error) {
-                  console.error(`Erro ao sincronizar ${tableName}:`, error);
-                }
-              } catch (e) {
-                console.error(`Erro ao sincronizar ${tableName}:`, e);
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Erro ao obter usuário atual:', e);
-        }
-      };
-
-      // Função para carregar dados do Supabase
-      const loadDataFromSupabase = async (): Promise<void> => {
-        try {
-          const newState: Partial<PersistedState> = {};
-          let hasError = false;
-          
-          const userResponse = await supabase.auth.getUser();
-          const userId = userResponse.data?.user?.id || 'anonymous';
-          
-          for (const [tableName, stateKey] of Object.entries(tableMapping)) {
-            try {
-              const { data, error } = await supabase
-                .from(tableName)
-                .select('*')
-                .eq('user_id', userId);
-              
-              if (error) {
-                console.error(`Erro ao carregar dados de ${tableName}:`, error);
-                hasError = true;
-              } else if (data) {
-                newState[stateKey] = data as any;
-              }
-            } catch (e) {
-              console.error(`Erro ao carregar dados de ${tableName}:`, e);
-              hasError = true;
-            }
-          }
-          
-          set({ 
-            ...newState as Partial<AppState>,
-            connectionStatus: hasError ? 'offline' : 'online',
-            lastSyncedAt: hasError ? null : new Date().toISOString()
-          });
-        } catch (e) {
-          console.error('Erro ao obter usuário atual:', e);
-          set({ connectionStatus: 'offline' });
-        }
-      };
-
-      // Função para verificar a conexão
-      const checkConnection = async (): Promise<boolean> => {
-        set({ connectionStatus: 'checking' });
-        
-        const online = await isOnline();
-        
-        set({ connectionStatus: online ? 'online' : 'offline' });
-        
-        if (online) {
-          await loadDataFromSupabase();
-        }
-        
-        return online;
-      };
-
-      // Wrapper para sincronizar alterações
-      const syncedSet = (state: Partial<AppState> | ((state: AppState) => Partial<AppState>)) => {
-        const result = set(state);
-        const currentState = get();
-        
-        if (currentState.connectionStatus === 'online') {
-          setTimeout(() => {
-            syncStateToSupabase(currentState).catch(console.error);
-          }, 0);
-        }
-        
-        return result;
-      };
-
-      // Configuração inicial de eventos para detecção de conectividade
-      if (typeof window !== 'undefined') {
-        setTimeout(() => {
-          checkConnection().catch(console.error);
-          
-          window.addEventListener('online', () => {
-            checkConnection().catch(console.error);
-          });
-          
-          window.addEventListener('offline', () => {
-            set({ connectionStatus: 'offline' });
-          });
-          
-          setInterval(() => {
-            checkConnection().catch(console.error);
-          }, 5 * 60 * 1000);
-        }, 0);
-      }
-
-      // Retorna o estado inicial com funções
-      return {
-        // Estado inicial
-        tarefas: [],
-        blocosTempo: [],
-        refeicoes: [],
-        medicacoes: [],
-        configuracao: {
-          tempoFoco: 25,
-          tempoPausa: 5,
-          temaEscuro: false,
-          reducaoEstimulos: false,
-        },
-        
-        // Novos estados iniciais para medicamentos e humor
-        medicamentos: [],
-        registrosHumor: [],
-        
-        // Estado inicial de sincronização
-        connectionStatus: 'checking' as ConnectionStatus,
-        lastSyncedAt: null,
-        pendingChanges: {},
-        checkConnection,
-        
-        // Implementações das ações para tarefas
-        adicionarTarefa: (tarefa: Omit<Tarefa, 'id'>) =>
-          syncedSet((state) => ({
-            tarefas: [...state.tarefas, { ...tarefa, id: Date.now().toString() }],
-          })),
-        
-        removerTarefa: (id: string) =>
-          syncedSet((state) => ({
-            tarefas: state.tarefas.filter((t) => t.id !== id),
-          })),
-        
-        toggleTarefaConcluida: (id: string) =>
-          syncedSet((state) => ({
-            tarefas: state.tarefas.map((t) =>
-              t.id === id ? { ...t, concluida: !t.concluida } : t
-            ),
-          })),
-        
-        // Implementações das ações para blocos de tempo
-        adicionarBlocoTempo: (bloco: Omit<BlocoTempo, 'id'>) =>
-          syncedSet((state) => ({
-            blocosTempo: [...state.blocosTempo, { ...bloco, id: Date.now().toString() }],
-          })),
-        
-        atualizarBlocoTempo: (id: string, bloco: Partial<BlocoTempo>) =>
-          syncedSet((state) => ({
-            blocosTempo: state.blocosTempo.map((b) =>
-              b.id === id ? { ...b, ...bloco } : b
-            ),
-          })),
-        
-        removerBlocoTempo: (id: string) =>
-          syncedSet((state) => ({
-            blocosTempo: state.blocosTempo.filter((b) => b.id !== id),
-          })),
-        
-        // Implementações das ações para refeições
-        adicionarRefeicao: (refeicao: Omit<Refeicao, 'id'>) =>
-          syncedSet((state) => ({
-            refeicoes: [...state.refeicoes, { ...refeicao, id: Date.now().toString() }],
-          })),
-        
-        removerRefeicao: (id: string) =>
-          syncedSet((state) => ({
-            refeicoes: state.refeicoes.filter((r) => r.id !== id),
-          })),
-        
-        // Implementações das ações para medicações
-        adicionarMedicacao: (medicacao: Omit<Medicacao, 'id'>) =>
-          syncedSet((state) => ({
-            medicacoes: [
-              ...state.medicacoes,
-              { ...medicacao, id: Date.now().toString() },
-            ],
-          })),
-        
-        marcarMedicacaoTomada: (id: string, data: string, horario: string, tomada: boolean) =>
-          syncedSet((state) => ({
-            medicacoes: state.medicacoes.map((med) => {
-              if (med.id === id) {
-                return {
-                  ...med,
-                  tomada: {
-                    ...med.tomada,
-                    [`${data}-${horario}`]: tomada,
-                  },
-                };
-              }
-              return med;
-            }),
-          })),
-        
-        // Implementações das novas ações para medicamentos
-        adicionarMedicamento: (medicamento: Omit<Medicamento, 'id'>) =>
-          syncedSet((state) => ({
-            medicamentos: [
-              ...state.medicamentos,
-              {
-                ...medicamento,
-                id: Date.now().toString(),
-              },
-            ],
-          })),
-        
-        atualizarMedicamento: (id: string, medicamento: Partial<Omit<Medicamento, 'id'>>) =>
-          syncedSet((state) => ({
-            medicamentos: state.medicamentos.map((med) =>
-              med.id === id ? { ...med, ...medicamento } : med
-            ),
-          })),
-        
-        removerMedicamento: (id: string) =>
-          syncedSet((state) => ({
-            medicamentos: state.medicamentos.filter((med) => med.id !== id),
-          })),
-        
-        registrarTomadaMedicamento: (id: string, dataHora: string) =>
-          syncedSet((state) => ({
-            medicamentos: state.medicamentos.map((med) =>
-              med.id === id ? { ...med, ultimaTomada: dataHora } : med
-            ),
-          })),
-        
-        // Implementações das novas ações para registros de humor
-        adicionarRegistroHumor: (registro: Omit<RegistroHumor, 'id'>) =>
-          syncedSet((state) => ({
-            registrosHumor: [
-              ...state.registrosHumor,
-              { ...registro, id: Date.now().toString() },
-            ],
-          })),
-        
-        atualizarRegistroHumor: (id: string, registro: Partial<Omit<RegistroHumor, 'id'>>) =>
-          syncedSet((state) => ({
-            registrosHumor: state.registrosHumor.map((reg) =>
-              reg.id === id ? { ...reg, ...registro } : reg
-            ),
-          })),
-        
-        removerRegistroHumor: (id: string) =>
-          syncedSet((state) => ({
-            registrosHumor: state.registrosHumor.filter((reg) => reg.id !== id),
-          })),
-        
-        // Implementações das ações para configurações
-        atualizarConfiguracao: (config: Partial<ConfiguracaoUsuario>) =>
-          syncedSet((state) => ({
-            configuracao: {
-              ...state.configuracao,
-              ...config,
-            },
-          })),
-      };
+const createStore = (set: (partial: Partial<Store> | ((state: Partial<Store>) => Partial<Store>), replace?: boolean) => void, get: () => Partial<Store>, api: any): Partial<Store> => {
+  return {
+    tarefas: [],
+    blocosTempo: [],
+    refeicoes: [],
+    medicacoes: [],
+    medicamentos: [],
+    registrosHumor: [],
+    configuracao: {
+      tempoFoco: 25,
+      tempoPausa: 5,
+      temaEscuro: false,
+      reducaoEstimulos: false
     },
-    persistConfig
-  )
-);
+    connectionStatus: 'checking' as ConnectionStatus,
+    lastSyncedAt: null,
+    pendingChanges: {},
+    checkConnection: async (): Promise<boolean> => {
+      const online = await isOnline();
+      set({ connectionStatus: online ? 'online' : 'offline' });
+      return online;
+    },
+    resetState: (): void => {
+      set(createStore(set, get, api));
+    },
+    adicionarTarefa: (tarefa: Omit<Tarefa, 'id'>): void => set((state: Partial<Store>) => ({
+      tarefas: [...(state.tarefas || []), { ...tarefa, id: crypto.randomUUID() }]
+    })),
+    removerTarefa: (id: string): void => set((state: Partial<Store>) => ({
+      tarefas: (state.tarefas || []).filter((t: Tarefa) => t.id !== id)
+    })),
+    toggleTarefaConcluida: (id: string): void => set((state: Partial<Store>) => ({
+      tarefas: (state.tarefas || []).map((t: Tarefa) => t.id === id ? { ...t, concluida: !t.concluida } : t)
+    })),
+    adicionarBlocoTempo: (bloco: Omit<BlocoTempo, 'id'>): void => set((state: Partial<Store>) => ({
+      blocosTempo: [...(state.blocosTempo || []), { ...bloco, id: crypto.randomUUID() }]
+    })),
+    atualizarBlocoTempo: (id: string, bloco: Partial<BlocoTempo>): void => set((state: Partial<Store>) => ({
+      blocosTempo: (state.blocosTempo || []).map((b: BlocoTempo) => b.id === id ? { ...b, ...bloco } : b)
+    })),
+    removerBlocoTempo: (id: string): void => set((state: Partial<Store>) => ({
+      blocosTempo: (state.blocosTempo || []).filter((b: BlocoTempo) => b.id !== id)
+    })),
+    adicionarRefeicao: (refeicao: Omit<Refeicao, 'id'>): void => set((state: Partial<Store>) => ({
+      refeicoes: [...(state.refeicoes || []), { ...refeicao, id: crypto.randomUUID() }]
+    })),
+    removerRefeicao: (id: string): void => set((state: Partial<Store>) => ({
+      refeicoes: (state.refeicoes || []).filter((r: Refeicao) => r.id !== id)
+    })),
+    adicionarMedicacao: (medicacao: Omit<Medicacao, 'id'>): void => set((state: Partial<Store>) => ({
+      medicacoes: [...(state.medicacoes || []), { ...medicacao, id: crypto.randomUUID() }]
+    })),
+    marcarMedicacaoTomada: (id: string, data: string, horario: string, tomada: boolean): void => set((state: Partial<Store>) => ({
+      medicacoes: (state.medicacoes || []).map((m: Medicacao) => 
+        m.id === id ? { ...m, tomada: { ...m.tomada, [`${data}-${horario}`]: tomada } } : m
+      )
+    })),
+    adicionarMedicamento: (medicamento: Omit<Medicamento, 'id'>): void => set((state: Partial<Store>) => ({
+      medicamentos: [...(state.medicamentos || []), { ...medicamento, id: crypto.randomUUID() }]
+    })),
+    atualizarMedicamento: (id: string, medicamento: Partial<Omit<Medicamento, 'id'>>): void => set((state: Partial<Store>) => ({
+      medicamentos: (state.medicamentos || []).map((m: Medicamento) => m.id === id ? { ...m, ...medicamento } : m)
+    })),
+    removerMedicamento: (id: string): void => set((state: Partial<Store>) => ({
+      medicamentos: (state.medicamentos || []).filter((m: Medicamento) => m.id !== id)
+    })),
+    registrarTomadaMedicamento: (id: string, dataHora: string): void => set((state: Partial<Store>) => ({
+      medicamentos: (state.medicamentos || []).map((m: Medicamento) => 
+        m.id === id ? { ...m, ultimaTomada: dataHora } : m
+      )
+    })),
+    adicionarRegistroHumor: (registro: Omit<RegistroHumor, 'id'>): void => set((state: Partial<Store>) => ({
+      registrosHumor: [...(state.registrosHumor || []), { ...registro, id: crypto.randomUUID() }]
+    })),
+    atualizarRegistroHumor: (id: string, registro: Partial<Omit<RegistroHumor, 'id'>>) => set((state: Partial<Store>) => ({
+      registrosHumor: (state.registrosHumor || []).map((r: RegistroHumor) => r.id === id ? { ...r, ...registro } : r)
+    })),
+    removerRegistroHumor: (id: string): void => set((state: Partial<Store>) => ({
+      registrosHumor: (state.registrosHumor || []).filter((r: RegistroHumor) => r.id !== id)
+    })),
+    atualizarConfiguracao: (config: Partial<ConfiguracaoUsuario>): void => set((state: Partial<Store>) => ({
+      configuracao: { ...(state.configuracao || {
+        tempoFoco: 25,
+        tempoPausa: 5,
+        temaEscuro: false,
+        reducaoEstimulos: false
+      }), ...config }
+    }))
+  };
+};
+
+// Use createStore in zustand
+export const useAppStore = create<Partial<Store>>()(persist(createStore, persistConfig));
