@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Utensils, BookOpen, Heart, Smile, DollarSign, Rocket, X } from 'lucide-react'
+import { Home, Utensils, BookOpen, Heart, Smile, DollarSign, Rocket, X, Calendar, Clock, Pills, Brain, Settings, Menu } from 'lucide-react'
+import { useAuth } from '@/app/providers/AuthProvider'
+import { useState } from 'react'
 
 type NavItem = {
   name: string
@@ -11,6 +13,8 @@ type NavItem = {
   color: string
   activeColor: string
   iconClasses?: string
+  public: boolean
+  requiresAuth: boolean
 }
 
 const navItems: NavItem[] = [
@@ -20,106 +24,129 @@ const navItems: NavItem[] = [
     icon: Home,
     color: 'text-inicio-primary',
     activeColor: 'bg-inicio-light',
+    public: true,
+    requiresAuth: false
   },
   {
-    name: 'Alimentação',
-    href: '/alimentacao',
-    icon: Utensils,
+    name: 'Agenda',
+    href: '/agenda',
+    icon: Calendar,
     color: 'text-alimentacao-primary',
     activeColor: 'bg-alimentacao-light',
+    public: false,
+    requiresAuth: true
   },
   {
-    name: 'Estudos',
-    href: '/estudos',
-    icon: BookOpen,
+    name: 'Blocos de Tempo',
+    href: '/blocos-tempo',
+    icon: Clock,
     color: 'text-estudos-primary',
     activeColor: 'bg-estudos-light',
+    public: false,
+    requiresAuth: true
   },
   {
-    name: 'Saúde',
-    href: '/saude',
-    icon: Heart,
+    name: 'Refeições',
+    href: '/refeicoes',
+    icon: Utensils,
     color: 'text-saude-primary',
     activeColor: 'bg-saude-light',
+    public: false,
+    requiresAuth: true
   },
   {
-    name: 'Lazer',
-    href: '/lazer',
-    icon: Smile,
+    name: 'Medicamentos',
+    href: '/medicamentos',
+    icon: Pills,
     color: 'text-lazer-primary',
     activeColor: 'bg-lazer-light',
+    public: false,
+    requiresAuth: true
   },
   {
-    name: 'Finanças',
-    href: '/financas',
-    icon: DollarSign,
+    name: 'Humor',
+    href: '/humor',
+    icon: Brain,
     color: 'text-financas-primary',
     activeColor: 'bg-financas-light',
+    public: false,
+    requiresAuth: true
   },
   {
-    name: 'Hiperfocos',
-    href: '/hiperfocos',
-    icon: Rocket,
+    name: 'Configurações',
+    href: '/configuracoes',
+    icon: Settings,
     color: 'text-hiperfocos-primary',
     activeColor: 'bg-hiperfocos-light',
+    public: false,
+    requiresAuth: true
   },
 ]
 
-type SidebarProps = {
-  onClose: () => void
-}
+export function Sidebar() {
+  const { session } = useAuth()
+  const [isOpen, setIsOpen] = useState(true)
 
-export function Sidebar({ onClose }: SidebarProps) {
-  const pathname = usePathname()
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen)
+  }
+
+  const filteredMenuItems = navItems.filter(item => 
+    item.public || (item.requiresAuth && session)
+  )
 
   return (
-    <div className="fixed inset-0 z-50 flex">
-      {/* Overlay escuro */}
-      <div 
-        className="fixed inset-0 bg-gray-900/60" 
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      
-      {/* Sidebar */}
-      <div className="relative flex-1 flex flex-col w-64 max-w-xs bg-white dark:bg-gray-800 shadow-xl">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Menu</h2>
-          <button
-            className="p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            onClick={onClose}
-            aria-label="Fechar menu"
-          >
-            <X className="h-5 w-5" />
-          </button>
+    <>
+      <button
+        onClick={toggleSidebar}
+        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+
+      <aside className={`
+        fixed md:static inset-y-0 left-0 z-40
+        transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        transition-transform duration-300 ease-in-out
+        w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+        flex flex-col
+        md:transform-none
+      `}>
+        <div className="p-4">
+          <h1 className="text-2xl font-bold text-primary">StayFocus</h1>
         </div>
-        
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-2">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
-              
-              return (
+
+        <nav className="flex-1 overflow-y-auto p-4">
+          <ul className="space-y-2">
+            {filteredMenuItems.map((item) => (
+              <li key={item.href}>
                 <Link
-                  key={item.name}
                   href={item.href}
-                  className={`
-                    flex items-center px-4 py-3 rounded-lg text-base font-medium transition-colors
-                    ${isActive 
-                      ? `${item.activeColor} ${item.color}` 
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'}
-                  `}
-                  onClick={onClose}
-                  aria-current={isActive ? 'page' : undefined}
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <item.icon className={`mr-3 h-5 w-5 ${item.iconClasses || ''}`} aria-hidden="true" />
-                  {item.name}
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.name}</span>
                 </Link>
-              )
-            })}
-          </div>
+              </li>
+            ))}
+          </ul>
         </nav>
-      </div>
-    </div>
+
+        {session && (
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3 px-4 py-2">
+              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                {session.user.email?.[0].toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {session.user.email}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </aside>
+    </>
   )
 }

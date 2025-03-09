@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, signInWithGitHub, signInWithGoogle } from '@/supabase/auth';
+import { LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -78,103 +79,81 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Login StayFocus</h1>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-        
-        {message && (
-          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-            {message}
-          </div>
-        )}
-        
-        <form onSubmit={handleEmailLogin} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="seu@email.com"
-              aria-label="Email"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="********"
-              aria-label="Senha"
-            />
-          </div>
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
-            aria-label="Entrar com email e senha"
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
-        
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Ou continue com</span>
-            </div>
-          </div>
-          
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <button
-              onClick={handleGitHubLogin}
-              disabled={loading}
-              className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              aria-label="Entrar com GitHub"
-            >
-              GitHub
-            </button>
-            
-            <button
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              aria-label="Entrar com Google"
-            >
-              Google
-            </button>
-          </div>
-        </div>
-        
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Não tem uma conta?{' '}
-            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-              Cadastre-se
-            </Link>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h1 className="text-center text-3xl font-bold text-gray-900 dark:text-white">
+            StayFocus
+          </h1>
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            Faça login para acessar sua conta
           </p>
+        </div>
+
+        <div className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow">
+          <form className="space-y-6" onSubmit={handleEmailLogin} method="POST">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Email
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Senha
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                <LogIn className="w-4 h-4" />
+                {loading ? 'Entrando...' : 'Entrar'}
+              </button>
+            </div>
+          </form>
+
+          <div className="text-center">
+            <a href="#" className="text-sm text-primary hover:text-primary/90">
+              Esqueceu sua senha?
+            </a>
+          </div>
+
+          <div className="text-center text-sm">
+            <span className="text-gray-600 dark:text-gray-400">
+              Não tem uma conta?{' '}
+            </span>
+            <Link href="/signup" className="text-primary hover:text-primary/90">
+              Registre-se
+            </Link>
+          </div>
         </div>
       </div>
     </div>
