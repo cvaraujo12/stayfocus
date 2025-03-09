@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { createLocalStorage } from './storage'
 
 interface SugestoesState {
   sugestoesFavoritas: string[]
@@ -28,7 +29,7 @@ export const useSugestoesStore = create<SugestoesState>()(
     }),
     {
       name: 'sugestoes-favoritas',
-      getStorage: () => localStorage
+      storage: createLocalStorage()
     }
   )
 )
