@@ -10,8 +10,12 @@ export default function Home() {
   const router = useRouter();
   
   useEffect(() => {
+    console.log("Estado de autenticação na página inicial:", { user, loading });
     if (!loading && !user) {
+      console.log("Usuário não autenticado, redirecionando para /login");
       router.push('/login');
+    } else if (!loading && user) {
+      console.log("Usuário autenticado:", user);
     }
   }, [loading, user, router]);
   

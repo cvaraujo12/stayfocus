@@ -23,10 +23,16 @@ export default function LoginPage() {
     
     try {
       const result = await signIn(email, password);
+      console.log("Resultado do login:", result);
       
       if (result.success) {
         setMessage('Login realizado com sucesso!');
-        router.push('/');
+        console.log("Login bem-sucedido, redirecionando em 1.5 segundos...");
+        // Adiciona um pequeno atraso antes do redirecionamento para o usuário ver a mensagem
+        setTimeout(() => {
+          console.log("Executando redirecionamento para /");
+          router.push('/');
+        }, 1500);
       } else {
         setError(result.message);
       }
