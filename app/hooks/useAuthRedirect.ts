@@ -10,7 +10,7 @@ import { isAuthRoute } from '../lib/auth';
  * 
  * Redireciona para:
  * - Login: quando não autenticado e tentando acessar páginas protegidas
- * - Dashboard: quando autenticado e tentando acessar páginas de auth
+ * - Página inicial: quando autenticado e tentando acessar páginas de auth
  */
 export function useAuthRedirect() {
   const { user, loading } = useAuth();
@@ -27,10 +27,10 @@ export function useAuthRedirect() {
       const isAuth = !!user;
       const isAuthPath = isAuthRoute(pathname || '');
       
-      // Se está autenticado mas está em uma rota de auth, redireciona para dashboard
+      // Se está autenticado mas está em uma rota de auth, redireciona para página inicial
       if (isAuth && isAuthPath) {
         redirectedRef.current = true;
-        router.replace('/dashboard');
+        router.replace('/');
         return;
       }
       
