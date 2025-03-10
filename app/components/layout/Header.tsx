@@ -1,11 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, X, Sun, Moon, HelpCircle, Anchor } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Sidebar } from './Sidebar'
 import Link from 'next/link'
-import SyncStatus from '../SyncStatus'
+import { SyncStatus } from './SyncStatus'
+
+// Componente para renderização segura de ícones no cliente
+function ClientOnlyIcon({ children }: { children: React.ReactNode }) {
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isClient) {
+    return null
+  }
+
+  return <>{children}</>
+}
 
 export function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -43,7 +58,9 @@ export function Header() {
               onClick={openSidebar}
               aria-label="Abrir menu"
             >
-              <Menu className="h-6 w-6" aria-hidden="true" />
+              <ClientOnlyIcon>
+                <Menu className="h-6 w-6" aria-hidden="true" />
+              </ClientOnlyIcon>
             </button>
             <div className="ml-3 flex items-center">
               <span className="sr-only">StayFocus</span>
@@ -63,24 +80,9 @@ export function Header() {
                 className="p-2 rounded-full text-sono-primary hover:bg-sono-light focus:outline-none focus:ring-2 focus:ring-sono-primary"
                 aria-label="Gestão do Sono"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  className="h-5 w-5"
-                >
-                  <path d="M2 4v16"></path>
-                  <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
-                  <path d="M2 17h20"></path>
-                  <path d="M6 8v9"></path>
-                </svg>
+                <ClientOnlyIcon>
+                  <Moon className="h-5 w-5 rotate-180" aria-hidden="true" />
+                </ClientOnlyIcon>
               </button>
             </Link>
             
@@ -90,7 +92,9 @@ export function Header() {
                 className="p-2 rounded-full text-autoconhecimento-primary hover:bg-autoconhecimento-light focus:outline-none focus:ring-2 focus:ring-autoconhecimento-primary"
                 aria-label="Notas de Autoconhecimento"
               >
-                <Anchor className="h-5 w-5" aria-hidden="true" />
+                <ClientOnlyIcon>
+                  <Anchor className="h-5 w-5" aria-hidden="true" />
+                </ClientOnlyIcon>
               </button>
             </Link>
             
@@ -100,11 +104,13 @@ export function Header() {
               className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
             >
-              {theme === 'dark' ? (
-                <Sun className="h-5 w-5" aria-hidden="true" />
-              ) : (
-                <Moon className="h-5 w-5" aria-hidden="true" />
-              )}
+              <ClientOnlyIcon>
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <Moon className="h-5 w-5" aria-hidden="true" />
+                )}
+              </ClientOnlyIcon>
             </button>
 
             {/* Help button */}
@@ -113,7 +119,9 @@ export function Header() {
                 className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Roadmap e Ajuda"
               >
-                <HelpCircle className="h-5 w-5" aria-hidden="true" />
+                <ClientOnlyIcon>
+                  <HelpCircle className="h-5 w-5" aria-hidden="true" />
+                </ClientOnlyIcon>
               </button>
             </Link>
 

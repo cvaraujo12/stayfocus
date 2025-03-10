@@ -255,30 +255,96 @@ export async function signInWithGoogle(options: Record<string, any> = {}) {
  * Registra um novo usuário
  * @param email Email do usuário
  * @param password Senha do usuário
- * @returns Objeto com dados do usuário registrado ou mensagem de erro
+ * @returns Objeto com dados do usuário registrado, status detalhado e mensagens de feedback
  */
 export async function signUp(email: string, password: string) {
   try {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    
-    if (error) {
+    // Validações básicas para feedback imediato
+    if (!email || !email.includes('@')) {
       return {
         success: false,
+        status: 'validation_error',
+        message: 'Por favor, insira um email válido',
+        details: 'O email deve conter @',
+        user: null,
+        session: null
+      };
+    }
+
+    if (!password || password.length < 8) {
+      return {
+        success: false,
+        status: 'validation_error',
+        message: 'A senha deve ter no mínimo 8 caracteres',
+        details: 'Use uma combinação de letras, números e símbolos para maior segurança',
+        user: null,
+        session: null
+      };
+    }
+
+    // Tenta criar o usuário
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: `${window?.location?.origin}/auth/callback`
+      }
+    });
+    
+    if (error) {
+      // Traduz mensagens de erro comuns para feedback mais amigável
+      const errorMessages: Record<string, { message: string, details: string }> = {
+        'User already registered': {
+          message: 'Email já cadastrado',
+          details: 'Tente fazer login ou recuperar sua senha'
+        },
+        'Password should be at least 6 characters': {
+          message: 'Senha muito curta',
+          details: 'Use uma senha com pelo menos 8 caracteres'
+        },
+        'Invalid email': {
+          message: 'Email inválido',
+          details: 'Verifique se o email está correto'
+        }
+      };
+
+      const friendlyError = errorMessages[error.message] || {
         message: error.message,
+        details: 'Se o problema persistir, entre em contato com o suporte'
+      };
+
+      return {
+        success: false,
+        status: 'error',
+        message: friendlyError.message,
+        details: friendlyError.details,
         user: null,
         session: null
       };
     }
     
+    // Armazena a sessão se disponível
     if (data.session) {
       await storeSessionSecurely(data.session);
+    }
+
+    // Verifica se o email já existe
+    if (data.user?.identities?.length === 0) {
+      return {
+        success: false,
+        status: 'existing_user',
+        message: 'Email já cadastrado',
+        details: 'Use a opção de login ou recupere sua senha',
+        user: null,
+        session: null
+      };
     }
     
     return {
       success: true,
-      message: data.user?.identities?.length === 0 
-        ? 'Email já cadastrado. Tente fazer login.' 
-        : 'Cadastro realizado com sucesso! Verifique seu email para confirmar.',
+      status: 'success',
+      message: 'Cadastro realizado com sucesso!',
+      details: 'Verifique seu email para confirmar sua conta',
       user: data.user,
       session: data.session
     };
@@ -286,7 +352,9 @@ export async function signUp(email: string, password: string) {
     console.error('Erro ao cadastrar usuário:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Erro ao cadastrar usuário',
+      status: 'unexpected_error',
+      message: 'Erro inesperado ao criar conta',
+      details: error instanceof Error ? error.message : 'Tente novamente mais tarde',
       user: null,
       session: null
     };

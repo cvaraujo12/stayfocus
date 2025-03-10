@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle2, Circle, PlusCircle, Edit2, Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { CheckCircle2, Circle, PlusCircle, Edit2, Calendar, ChevronLeft, ChevronRight, X, RefreshCw, Loader2, Cloud, CloudOff } from 'lucide-react'
 import { Button } from '@/app/components/ui/Button'
 import { Input } from '@/app/components/ui/Input'
 import { Modal } from '@/app/components/ui/Modal'
 import { Badge } from '@/app/components/ui/Badge'
 import { usePrioridadesStore, Prioridade } from '@/app/stores/prioridadesStore'
+import { useAuth } from '@/app/contexts/AuthContext'
+import { checkConnection } from '@/supabase/utils'
 
 export function ListaPrioridades() {
   const { 
@@ -16,8 +18,14 @@ export function ListaPrioridades() {
     removerPrioridade, 
     toggleConcluida, 
     getHistoricoPorData,
-    getDatasPrioridades
+    getDatasPrioridades,
+    carregarPrioridades,
+    sincronizar,
+    isSyncing,
+    lastSyncedAt
   } = usePrioridadesStore()
+  
+  const { user } = useAuth()
   
   const [novoTexto, setNovoTexto] = useState('')
   const [prioridadeEditando, setPrioridadeEditando] = useState<Prioridade | null>(null)
@@ -26,7 +34,41 @@ export function ListaPrioridades() {
   const [dataAtual, setDataAtual] = useState(new Date().toISOString().split('T')[0])
   const [prioridadesExibidas, setPrioridadesExibidas] = useState<Prioridade[]>([])
   const [datasHistorico, setDatasHistorico] = useState<string[]>([])
-
+  const [isOnline, setIsOnline] = useState(true)
+  
+  // Verificar status online/offline
+  useEffect(() => {
+    const verificarConexao = async () => {
+      const { online } = await checkConnection()
+      setIsOnline(online)
+    }
+    
+    verificarConexao()
+    
+    // Verificar periodicamente a conexão e quando a visibilidade da página mudar
+    const interval = setInterval(verificarConexao, 60000) // a cada minuto
+    
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        verificarConexao()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+  
+  // Carregar prioridades do backend quando logado
+  useEffect(() => {
+    if (user?.id) {
+      carregarPrioridades(user.id)
+    }
+  }, [user, carregarPrioridades])
+  
   // Carregar prioridades do dia atual
   useEffect(() => {
     const prioridadesDoDia = getHistoricoPorData(dataAtual)
@@ -94,32 +136,79 @@ export function ListaPrioridades() {
   const cancelarEdicao = () => {
     setPrioridadeEditando(null)
   }
+  
+  // Função para sincronizar manualmente
+  const sincronizarManualmente = () => {
+    if (user?.id) {
+      sincronizar(user.id)
+    }
+  }
 
   // Formatar data para exibição (DD/MM/YYYY)
   const formatarData = (dataISO: string) => {
     const partes = dataISO.split('-')
     return `${partes[2]}/${partes[1]}/${partes[0]}`
   }
+  
+  // Formatar horário da última sincronização
+  const formatarUltimaSincronizacao = () => {
+    if (!lastSyncedAt) return 'Nunca sincronizado'
+    
+    const data = new Date(lastSyncedAt)
+    return `${data.toLocaleDateString()} às ${data.toLocaleTimeString()}`
+  }
 
   return (
     <div className="space-y-4">
-      {/* Cabeçalho com controles de histórico */}
+      {/* Cabeçalho com controles de histórico e status de conexão */}
       <div className="flex justify-between items-center mb-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => setShowHistory(!showHistory)}
-          aria-label={showHistory ? "Esconder histórico" : "Mostrar histórico"}
-        >
-          <Calendar className="h-4 w-4 mr-1" />
-          {showHistory ? 'Esconder Histórico' : 'Ver Histórico'}
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowHistory(!showHistory)}
+            aria-label={showHistory ? "Esconder histórico" : "Mostrar histórico"}
+          >
+            <Calendar className="h-4 w-4 mr-1" />
+            {showHistory ? 'Esconder Histórico' : 'Ver Histórico'}
+          </Button>
+          
+          {/* Indicador de status online/offline */}
+          <span 
+            className={`inline-flex items-center text-xs ${isOnline ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}
+            title={isOnline ? 'Conectado' : 'Desconectado'}
+          >
+            {isOnline ? <Cloud className="h-3 w-3 mr-1" /> : <CloudOff className="h-3 w-3 mr-1" />}
+            {isOnline ? 'Online' : 'Offline'}
+          </span>
+        </div>
         
-        {isToday() ? (
-          <Badge>Hoje</Badge>
-        ) : (
-          <Badge variant="secondary">{formatarData(dataAtual)}</Badge>
-        )}
+        <div className="flex items-center space-x-2">
+          {/* Botão de sincronização manual */}
+          {user && isOnline && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={sincronizarManualmente}
+              disabled={isSyncing}
+              aria-label="Sincronizar dados"
+              title={`Última sincronização: ${formatarUltimaSincronizacao()}`}
+              className="text-blue-600 dark:text-blue-400"
+            >
+              {isSyncing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+          
+          {isToday() ? (
+            <Badge>Hoje</Badge>
+          ) : (
+            <Badge variant="secondary">{formatarData(dataAtual)}</Badge>
+          )}
+        </div>
       </div>
 
       {/* Controles de navegação no histórico */}
@@ -248,30 +337,36 @@ export function ListaPrioridades() {
       )}
 
       {/* Modal de edição */}
-      {prioridadeEditando && (
-        <Modal
-          isOpen={!!prioridadeEditando}
-          title="Editar Prioridade"
-          onClose={cancelarEdicao}
-        >
-          <div className="space-y-4">
-            <Input
-              value={textoEditando}
-              onChange={(e) => setTextoEditando(e.target.value)}
-              placeholder="Texto da prioridade"
-              maxLength={50}
-            />
-            
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={cancelarEdicao}>
-                Cancelar
-              </Button>
-              <Button onClick={salvarEdicao} disabled={!textoEditando.trim()}>
-                Salvar
-              </Button>
-            </div>
+      <Modal 
+        isOpen={prioridadeEditando !== null} 
+        onClose={cancelarEdicao}
+        title="Editar Prioridade"
+      >
+        <div className="space-y-4">
+          <Input
+            type="text"
+            value={textoEditando}
+            onChange={(e) => setTextoEditando(e.target.value)}
+            placeholder="Texto da prioridade..."
+            maxLength={50}
+          />
+          
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={cancelarEdicao}>
+              Cancelar
+            </Button>
+            <Button onClick={salvarEdicao}>
+              Salvar
+            </Button>
           </div>
-        </Modal>
+        </div>
+      </Modal>
+      
+      {/* Indicador de última sincronização */}
+      {lastSyncedAt && (
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-right">
+          Sincronizado: {formatarUltimaSincronizacao()}
+        </div>
       )}
     </div>
   )

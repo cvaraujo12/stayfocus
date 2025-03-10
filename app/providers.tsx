@@ -1,21 +1,12 @@
 'use client'
 
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
-import { type ThemeProviderProps } from 'next-themes/dist/types'
-import { AuthProvider } from './contexts/AuthContext'
-import { ReactNode } from 'react'
+// Este arquivo é apenas um re-export do providers/index.tsx para manter a compatibilidade
+import { Providers as ProvidersImpl } from './providers/index'
 
-// Estendendo o tipo ThemeProviderProps para incluir children como ReactNode
-type ProvidersProps = ThemeProviderProps & {
-  children: ReactNode
-}
-
-export function Providers({ children, ...props }: ProvidersProps) {
+export function Providers({ children, ...props }: { children: React.ReactNode }) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem {...props}>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </NextThemesProvider>
+    <ProvidersImpl {...props}>
+      {children}
+    </ProvidersImpl>
   )
-}
+} 

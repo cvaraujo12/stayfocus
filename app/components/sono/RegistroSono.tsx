@@ -14,7 +14,7 @@ export function RegistroSono() {
   const [dataFim, setDataFim] = useState('')
   const [horaFim, setHoraFim] = useState('')
   const [notas, setNotas] = useState('')
-  const [qualidade, setQualidade] = useState<number | null>(null)
+  const [qualidade, setQualidade] = useState<number | undefined>(undefined)
   const [modoEdicao, setModoEdicao] = useState(false)
   const [idEdicao, setIdEdicao] = useState<string | null>(null)
   
@@ -30,7 +30,7 @@ export function RegistroSono() {
   }
   
   // Calcular duração do sono
-  const calcularDuracao = (inicio: string, fim: string | null) => {
+  const calcularDuracao = (inicio: string, fim: string | undefined) => {
     if (!fim) return null
     
     const dataInicio = parseISO(inicio)
@@ -47,13 +47,15 @@ export function RegistroSono() {
   }
   
   // Formatação da qualidade do sono em estrelas
-  const renderEstrelas = (qualidade: number | null) => {
-    if (qualidade === null) return null
+  const renderEstrelas = (qualidade: number | undefined) => {
+    if (qualidade === undefined) return null
+    
+    const nivelQualidade = Math.min(Math.max(qualidade, 1), 5) // Garante que o valor está entre 1 e 5
     
     return Array.from({ length: 5 }).map((_, i) => (
       <Star 
         key={i} 
-        className={`h-4 w-4 ${i < qualidade ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
+        className={`h-4 w-4 ${i < nivelQualidade ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
       />
     ))
   }
@@ -72,16 +74,21 @@ export function RegistroSono() {
     if (modoEdicao && idEdicao) {
       atualizarRegistroSono(idEdicao, {
         inicio: inicioISO,
-        fim: fimISO,
-        qualidade,
-        notas
+        fim: fimISO || undefined,
+        qualidade: qualidade,
+        notas: notas || undefined
       })
       
       // Limpar modo de edição
       setModoEdicao(false)
       setIdEdicao(null)
     } else {
-      adicionarRegistroSono(inicioISO, fimISO, qualidade, notas)
+      adicionarRegistroSono({
+        inicio: inicioISO,
+        fim: fimISO || undefined,
+        qualidade: qualidade,
+        notas: notas || undefined
+      })
     }
     
     // Limpar o formulário
@@ -95,7 +102,7 @@ export function RegistroSono() {
     setDataFim('')
     setHoraFim('')
     setNotas('')
-    setQualidade(null)
+    setQualidade(undefined)
   }
   
   // Iniciar edição de um registro
@@ -118,7 +125,7 @@ export function RegistroSono() {
     setDataFim(dataFim)
     setHoraFim(horaFim)
     setNotas(registro.notas || '')
-    setQualidade(registro.qualidade)
+    setQualidade(registro.qualidade || undefined)
     
     setModoEdicao(true)
     setIdEdicao(registro.id)
@@ -141,7 +148,10 @@ export function RegistroSono() {
   // Registrar acordar agora
   const registrarAcordarAgora = (id: string) => {
     const agora = new Date().toISOString()
-    atualizarRegistroSono(id, { fim: agora })
+    atualizarRegistroSono(id, { 
+      fim: agora,
+      qualidade: qualidade // Mantém a qualidade atual se existir
+    })
   }
   
   return (
@@ -255,7 +265,7 @@ export function RegistroSono() {
                 aria-label={`Qualidade ${valor} de 5`}
               >
                 <Star 
-                  className={`h-6 w-6 ${qualidade !== null && valor <= qualidade ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
+                  className={`h-6 w-6 ${qualidade !== undefined && valor <= qualidade ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
                 />
               </button>
             ))}

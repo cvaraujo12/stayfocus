@@ -10,17 +10,53 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Função para testar a conexão com o Supabase
 export async function testSupabaseConnection() {
   try {
-    const { data, error } = await supabase.from('users').select('count').single();
-    
-    if (error) {
-      console.error('Erro ao conectar com o Supabase:', error.message);
-      return { success: false, message: error.message };
+    // Tenta uma requisição simples para verificar a conexão
+    const { data, error } = await supabase
+      .from('users')
+      .select('id')
+      .limit(1);
+
+    // Se não houver erro, significa que a conexão está funcionando
+    if (!error) {
+      return { 
+        success: true, 
+        message: 'Conexão com o Supabase estabelecida com sucesso!',
+        online: true
+      };
     }
-    
-    return { success: true, message: 'Conexão com o Supabase estabelecida com sucesso!' };
+
+    // Se houver erro, verifica o tipo
+    if (error.code === 'PGRST116' || error.code === '42P01') {
+      // Tabela não existe, mas conexão está ok
+      return { 
+        success: true, 
+        message: 'Conexão estabelecida, mas tabela não encontrada',
+        online: true
+      };
+    }
+
+    if (error.code === '401' || error.code === 'PGRST301') {
+      return { 
+        success: false, 
+        message: 'Erro de autenticação. Por favor, faça login novamente.',
+        online: true
+      };
+    }
+
+    // Outros erros indicam problemas de conexão
+    return { 
+      success: false, 
+      message: `Erro de conexão: ${error.message}`,
+      online: false
+    };
+
   } catch (error) {
-    console.error('Erro ao testar conexão com o Supabase:', error);
-    return { success: false, message: error instanceof Error ? error.message : 'Erro desconhecido' };
+    console.error('Erro ao testar conexão:', error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Erro desconhecido',
+      online: false
+    };
   }
 }
 

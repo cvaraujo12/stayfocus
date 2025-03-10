@@ -1,12 +1,15 @@
 'use client'
 
-import { useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { useStore } from '@/app/store'
+import { Check, X, Clock } from 'lucide-react'
 import { Pill, CheckCircle2, Circle } from 'lucide-react'
-import { useAppStore } from '@/app/store'
 import { Medicamento } from '@/app/store'
 
 export function ChecklistMedicamentos() {
-  const { medicamentos, registrarTomadaMedicamento } = useAppStore(
+  const { medicamentos, registrarTomadaMedicamento } = useStore(
     (state) => ({
       medicamentos: state.medicamentos || [],
       registrarTomadaMedicamento: state.registrarTomadaMedicamento

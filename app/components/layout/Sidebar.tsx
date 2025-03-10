@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Utensils, BookOpen, Heart, Smile, DollarSign, Rocket, X, Calendar, Clock, Pills, Brain, Settings, Menu } from 'lucide-react'
+import { Home, Utensils, BookOpen, Heart, Smile, DollarSign, Rocket, X, Calendar, Clock, Pill, Brain, Settings, Menu } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useState } from 'react'
 
@@ -57,7 +57,7 @@ const navItems: NavItem[] = [
   {
     name: 'Medicamentos',
     href: '/medicamentos',
-    icon: Pills,
+    icon: Pill,
     color: 'text-lazer-primary',
     activeColor: 'bg-lazer-light',
     public: false,
@@ -83,12 +83,19 @@ const navItems: NavItem[] = [
   },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const { session } = useAuth()
   const [isOpen, setIsOpen] = useState(true)
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
+    if (!isOpen && onClose) {
+      onClose()
+    }
   }
 
   const filteredMenuItems = navItems.filter(item => 

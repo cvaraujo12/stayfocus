@@ -10,10 +10,17 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:sync": "node supabase/test-sync.js"
+    "test:sync": "node supabase/test-sync.js",
+    "test:sync:all": "node test-sync-complete.js",
+    "test:sync:user": "node supabase/create-test-user.js",
+    "test:sync:functions": "node supabase/install-functions.js",
+    "db:setup": "node scripts/execute_db_setup.js",
+    "db:tables": "node scripts/check_tables.js",
+    "db:create:tables": "node supabase/execute-tables-sql.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.49.1",
     "@vercel/speed-insights": "^1.2.0",
     "class-variance-authority": "^0.7.1",
@@ -55,6 +62,7 @@
     "postcss": "^8.4.32",
     "prettier": "^3.1.1",
     "tailwindcss": "^3.3.6",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }

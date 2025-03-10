@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const dotenv = require('dotenv');
+const crypto = require('crypto');
 
 // Carrega as variáveis de ambiente
 dotenv.config({ path: '.env.local' });
@@ -66,8 +67,8 @@ async function checkTables() {
 async function testInsert() {
   console.log('Testando inserção de dados...');
   
-  // Cria um usuário de teste
-  const userId = 'test-user-' + Date.now();
+  // Cria um usuário de teste com UUID válido
+  const userId = crypto.randomUUID();
   
   // Insere um usuário de teste
   const { error: userError } = await supabase
@@ -158,3 +159,4 @@ async function runTests() {
 runTests().catch(error => {
   console.error('Erro durante a execução dos testes:', error);
   process.exit(1); 
+}); 

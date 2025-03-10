@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, signInWithGitHub, signInWithGoogle } from '@/supabase/auth';
@@ -8,16 +8,17 @@ import { LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   // Função para lidar com o login com email e senha
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     
     try {
@@ -25,8 +26,7 @@ export default function LoginPage() {
       
       if (result.success) {
         setMessage('Login realizado com sucesso!');
-        // Redireciona para a página inicial após login bem-sucedido
-        setTimeout(() => router.push('/'), 1000);
+        router.push('/');
       } else {
         setError(result.message);
       }
@@ -34,13 +34,13 @@ export default function LoginPage() {
       setError('Erro ao fazer login. Tente novamente.');
       console.error('Erro no login:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   // Função para lidar com o login com GitHub
   const handleGitHubLogin = async () => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     
     try {
@@ -54,13 +54,13 @@ export default function LoginPage() {
       setError('Erro ao fazer login com GitHub. Tente novamente.');
       console.error('Erro no login com GitHub:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   // Função para lidar com o login com Google
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     
     try {
@@ -74,7 +74,7 @@ export default function LoginPage() {
       setError('Erro ao fazer login com Google. Tente novamente.');
       console.error('Erro no login com Google:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -91,6 +91,18 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow">
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded">
+              {error}
+            </div>
+          )}
+          
+          {message && (
+            <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded">
+              {message}
+            </div>
+          )}
+          
           <form className="space-y-6" onSubmit={handleEmailLogin} method="POST">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -131,11 +143,11 @@ export default function LoginPage() {
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 <LogIn className="w-4 h-4" />
-                {loading ? 'Entrando...' : 'Entrar'}
+                {isLoading ? 'Entrando...' : 'Entrar'}
               </button>
             </div>
           </form>

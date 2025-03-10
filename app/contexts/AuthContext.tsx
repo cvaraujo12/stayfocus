@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import { getCurrentUser, signOut } from '@/supabase/auth';
 import { useAppStore } from '../store';
+import { SyncManager } from '@/app/components/SyncManager';
 
 // Definição do tipo para o contexto de autenticação
 type AuthContextType = {
@@ -62,6 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (result && result.success) {
         setUser(result.user);
+        
+        // Salvar dados do usuário no localStorage para acesso offline
+        if (typeof window !== 'undefined' && result.user) {
+          localStorage.setItem('auth-user', JSON.stringify({
+            id: result.user.id,
+            email: result.user.email,
+            user_metadata: result.user.user_metadata
+          }));
+        }
       } else if (result) {
         setUser(null);
         if (result.message !== 'Nenhum usuário autenticado') {
@@ -89,6 +99,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Limpa o estado do usuário
         setUser(null);
         clearUserState();
+        
+        // Remove dados do usuário do localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth-user');
+        }
 
         // Redireciona para a página de login
         router.push('/login');
@@ -138,5 +153,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUser,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {/* SyncManager é responsável por iniciar e gerenciar a sincronização de dados */}
+      <SyncManager userId={user?.id || null} />
+      {children}
+    </AuthContext.Provider>
+  );
 } 

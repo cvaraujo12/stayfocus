@@ -1,60 +1,121 @@
+"use client";
+
 import { createContext, useContext, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/supabase/client'
-import { useAppStore } from '../store'
-import { Session } from '@supabase/supabase-js'
+import { useStore } from '../store'
+import { User } from '@supabase/supabase-js'
+import { getCurrentUser, signOut } from '@/supabase/auth'
+import { useRouter } from 'next/navigation'
 
 type AuthContextType = {
-  session: Session | null
-  loading: boolean
-}
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+};
 
 const AuthContext = createContext<AuthContextType>({
-  session: null,
-  loading: true
+  user: null,
+  loading: true,
+  error: null,
+  logout: async () => {},
+  refreshUser: async () => {},
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const resetState = useStore(state => state.resetState)
   const router = useRouter()
-  const resetState = useAppStore(state => state.resetState)
+
+  // Função para obter o usuário atual
+  const refreshUser = async () => {
+    try {
+      setLoading(true);
+      const result = await getCurrentUser();
+      
+      if (result && result.success) {
+        setUser(result.user);
+      } else if (result) {
+        setUser(null);
+        if (result.message !== 'Nenhum usuário autenticado') {
+          setError(result.message);
+        }
+      } else {
+        setUser(null);
+        setError('Erro ao obter dados do usuário');
+      }
+    } catch (error) {
+      console.error('Erro ao obter usuário:', error);
+      setError('Erro ao verificar autenticação');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Função para fazer logout
+  const logout = async () => {
+    try {
+      setLoading(true);
+      const result = await signOut();
+      
+      if (result && result.success) {
+        setUser(null);
+        
+        // Limpa o estado quando o usuário deslogar
+        if (resetState) {
+          resetState();
+        }
+        
+        router.push('/login');
+      } else if (result) {
+        setError(result.message);
+      } else {
+        setError('Erro ao fazer logout');
+      }
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      setError('Erro ao fazer logout');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Obtém a sessão inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
-
+    refreshUser();
+    
     // Configura o listener para mudanças na autenticação
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      
-      if (!session) {
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        setUser(null);
+        
         // Limpa o estado quando o usuário deslogar
-        resetState()
-        // Redireciona para a página de login
-        router.push('/login')
+        if (resetState) {
+          resetState();
+        }
       }
-    })
+    });
 
-    return () => subscription.unsubscribe()
-  }, [resetState, router])
+    return () => subscription.unsubscribe();
+  }, [resetState]);
 
-  // Mostra uma tela de carregamento enquanto verifica a autenticação
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
+  // Valores fornecidos pelo contexto
+  const value = {
+    user,
+    loading,
+    error,
+    logout,
+    refreshUser,
+  };
 
   return (
-    <AuthContext.Provider value={{ session, loading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )

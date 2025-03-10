@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from '@/app/providers'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { PainelLayout } from './components/layout/PainelLayout'
 
 export const metadata: Metadata = {
   title: 'StayFocus',
@@ -26,9 +25,7 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className="bg-gray-50 dark:bg-gray-900">
         <Providers>
-          <PainelLayout>
-            {children}
-          </PainelLayout>
+          {children}
         </Providers>
         <SpeedInsights />
       </body>

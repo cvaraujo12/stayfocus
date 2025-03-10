@@ -1,62 +1,68 @@
-'use client';
+"use client";
 
-import { Card } from '@/app/components/ui/Card'
-import { PainelDia } from '@/app/components/inicio/PainelDia'
-import { ListaPrioridades } from '@/app/components/inicio/ListaPrioridades'
-import { LembretePausas } from '@/app/components/inicio/LembretePausas'
-import { ChecklistMedicamentos } from '@/app/components/inicio/ChecklistMedicamentos'
-import ProtectedRoute from './components/ProtectedRoute';
-import LogoutButton from './components/LogoutButton';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { PainelLayout } from './components/layout/PainelLayout';
 
-export default function HomePage() {
-  const { user } = useAuth();
+export default function Home() {
+  const { session, loading } = useAuth();
+  const router = useRouter();
   
-  return (
-    <ProtectedRoute>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Início</h1>
-          
-          <div className="flex items-center gap-4">
-            {user && (
-              <div className="text-sm text-gray-600 dark:text-gray-300">
-                Olá, {user.email}
-              </div>
-            )}
-            <LogoutButton />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Painel Visual do Dia */}
-          <div className="md:col-span-2">
-            <Card title="Painel do Dia">
-              <PainelDia />
-            </Card>
-          </div>
-          
-          {/* Lista de Prioridades */}
-          <div>
-            <Card title="Prioridades do Dia">
-              <div className="space-y-6">
-                <ListaPrioridades />
-                
-                {/* Separador */}
-                <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-                
-                {/* Checklist de Medicamentos Diários */}
-                <ChecklistMedicamentos />
-              </div>
-            </Card>
-          </div>
-        </div>
-        
-        {/* Lembretes de Pausas */}
-        <Card title="Lembretes de Pausas">
-          <LembretePausas />
-        </Card>
+  useEffect(() => {
+    if (!loading && !session) {
+      router.replace('/login');
+    }
+  }, [session, loading, router]);
+  
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
-    </ProtectedRoute>
+    );
+  }
+  
+  if (!session) {
+    return null;
+  }
+
+  return (
+    <PainelLayout>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Dashboard
+        </h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Tarefas Pendentes
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Você tem 0 tarefas pendentes para hoje
+            </p>
+          </div>
+          
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Próximos Blocos de Tempo
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Nenhum bloco de tempo programado
+            </p>
+          </div>
+          
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Humor
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Registre como você está se sentindo hoje
+            </p>
+          </div>
+        </div>
+      </div>
+    </PainelLayout>
   )
 }

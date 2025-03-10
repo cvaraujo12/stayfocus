@@ -5,12 +5,15 @@ import { BookOpen, Plus, X, Edit, Trash, Check, Clock } from 'lucide-react'
 import { useRegistroEstudosStore, SessaoEstudo } from '@/app/stores/registroEstudosStore'
 
 export function RegistroEstudos() {
-  const { sessoes, adicionarSessao, removerSessao, alternarCompletar, editarSessao } = useRegistroEstudosStore()
+  const { sessoes, adicionarSessao, removerSessao, marcarConcluida, editarSessao } = useRegistroEstudosStore()
   
-  const [novaSessao, setNovaSessao] = useState({
+  const [novaSessao, setNovaSessao] = useState<Omit<SessaoEstudo, 'id' | 'concluida'>>({
     titulo: '',
-    descricao: '',
-    duracao: 30,
+    categoria: 'estudos',
+    duracaoMinutos: 30,
+    dataSessao: new Date().toISOString().split('T')[0],
+    horaInicio: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    observacoes: ''
   })
   
   const [editandoId, setEditandoId] = useState<string | null>(null)
@@ -23,8 +26,11 @@ export function RegistroEstudos() {
     
     setNovaSessao({
       titulo: '',
-      descricao: '',
-      duracao: 30,
+      categoria: 'estudos',
+      duracaoMinutos: 30,
+      dataSessao: new Date().toISOString().split('T')[0],
+      horaInicio: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      observacoes: ''
     })
     
     setMostrarForm(false)
@@ -34,8 +40,11 @@ export function RegistroEstudos() {
     setEditandoId(sessao.id)
     setNovaSessao({
       titulo: sessao.titulo,
-      descricao: sessao.descricao,
-      duracao: sessao.duracao,
+      categoria: sessao.categoria || 'estudos',
+      duracaoMinutos: sessao.duracaoMinutos,
+      dataSessao: sessao.dataSessao,
+      horaInicio: sessao.horaInicio || '',
+      observacoes: sessao.observacoes || ''
     })
     setMostrarForm(true)
   }
@@ -47,8 +56,11 @@ export function RegistroEstudos() {
     
     setNovaSessao({
       titulo: '',
-      descricao: '',
-      duracao: 30,
+      categoria: 'estudos',
+      duracaoMinutos: 30,
+      dataSessao: new Date().toISOString().split('T')[0],
+      horaInicio: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      observacoes: ''
     })
     
     setEditandoId(null)
@@ -58,16 +70,19 @@ export function RegistroEstudos() {
   const cancelarForm = () => {
     setNovaSessao({
       titulo: '',
-      descricao: '',
-      duracao: 30,
+      categoria: 'estudos',
+      duracaoMinutos: 30,
+      dataSessao: new Date().toISOString().split('T')[0],
+      horaInicio: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      observacoes: ''
     })
     setEditandoId(null)
     setMostrarForm(false)
   }
 
   // Calcular estatísticas
-  const sessoesCompletas = sessoes.filter((s) => s.completo).length
-  const totalMinutos = sessoes.reduce((total, s) => total + (s.completo ? s.duracao : 0), 0)
+  const sessoesCompletas = sessoes.filter((s) => s.concluida).length
+  const totalMinutos = sessoes.reduce((total, s) => total + (s.concluida ? s.duracaoMinutos : 0), 0)
   const totalHoras = Math.floor(totalMinutos / 60)
   const minutosRestantes = totalMinutos % 60
 
@@ -106,7 +121,7 @@ export function RegistroEstudos() {
           <div
             key={sessao.id}
             className={`p-3 bg-white dark:bg-gray-800 rounded-lg border ${
-              sessao.completo
+              sessao.concluida
                 ? 'border-green-200 dark:border-green-900'
                 : 'border-gray-200 dark:border-gray-700'
             }`}
@@ -114,21 +129,21 @@ export function RegistroEstudos() {
             <div className="flex items-start justify-between">
               <div className="flex items-start">
                 <button
-                  onClick={() => alternarCompletar(sessao.id)}
+                  onClick={() => marcarConcluida(sessao.id, !sessao.concluida)}
                   className={`mt-1 mr-3 flex-shrink-0 w-5 h-5 rounded-full border ${
-                    sessao.completo
+                    sessao.concluida
                       ? 'bg-green-500 border-green-500 text-white'
                       : 'border-gray-400 dark:border-gray-500'
                   } flex items-center justify-center`}
-                  aria-label={sessao.completo ? 'Marcar como incompleto' : 'Marcar como completo'}
+                  aria-label={sessao.concluida ? 'Marcar como incompleto' : 'Marcar como completo'}
                 >
-                  {sessao.completo && <Check className="h-3 w-3" />}
+                  {sessao.concluida && <Check className="h-3 w-3" />}
                 </button>
                 
                 <div>
                   <h3
                     className={`font-medium ${
-                      sessao.completo
+                      sessao.concluida
                         ? 'text-gray-500 dark:text-gray-400 line-through'
                         : 'text-gray-900 dark:text-white'
                     }`}
@@ -136,18 +151,18 @@ export function RegistroEstudos() {
                     {sessao.titulo}
                   </h3>
                   
-                  {sessao.descricao && (
+                  {sessao.observacoes && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {sessao.descricao}
+                      {sessao.observacoes}
                     </p>
                   )}
                   
                   <div className="flex items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
                     <Clock className="h-3 w-3 mr-1" />
-                    <span>{sessao.duracao} minutos</span>
+                    <span>{sessao.duracaoMinutos} minutos</span>
                     <span className="mx-2">•</span>
                     <BookOpen className="h-3 w-3 mr-1" />
-                    <span>{new Date(sessao.data).toLocaleDateString()}</span>
+                    <span>{new Date(sessao.dataSessao).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -206,13 +221,13 @@ export function RegistroEstudos() {
             </div>
             
             <div>
-              <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="observacoes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Descrição (opcional)
               </label>
               <textarea
-                id="descricao"
-                value={novaSessao.descricao}
-                onChange={(e) => setNovaSessao({ ...novaSessao, descricao: e.target.value })}
+                id="observacoes"
+                value={novaSessao.observacoes}
+                onChange={(e) => setNovaSessao({ ...novaSessao, observacoes: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                 placeholder="Detalhes sobre o que será estudado"
                 rows={2}
@@ -220,16 +235,16 @@ export function RegistroEstudos() {
             </div>
             
             <div>
-              <label htmlFor="duracao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="duracaoMinutos" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Duração (minutos)
               </label>
               <input
                 type="number"
-                id="duracao"
+                id="duracaoMinutos"
                 min="5"
                 max="240"
-                value={novaSessao.duracao}
-                onChange={(e) => setNovaSessao({ ...novaSessao, duracao: parseInt(e.target.value) || 30 })}
+                value={novaSessao.duracaoMinutos}
+                onChange={(e) => setNovaSessao({ ...novaSessao, duracaoMinutos: parseInt(e.target.value) || 30 })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
               />
             </div>

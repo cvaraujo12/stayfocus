@@ -1,8 +1,14 @@
 module.exports = {
+  preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: 'tsconfig.json'
+    }],
   },
   testMatch: ['**/__tests__/**/*.test.[jt]s?(x)'],
   collectCoverageFrom: [
@@ -18,4 +24,9 @@ module.exports = {
       statements: 80,
     },
   },
+  globals: {
+    'ts-jest': {
+      isolatedModules: true
+    }
+  }
 };

@@ -1,5 +1,69 @@
 import { supabase } from './client';
 
+type QueuedOperation = {
+  id: string;
+  table: string;
+  operation: 'insert' | 'update' | 'delete';
+  payload?: any;
+  timestamp: number;
+};
+
+const QUEUE_KEY = 'offline_queue';
+
+function getOfflineQueue(): QueuedOperation[] {
+  if (typeof window === 'undefined') return [];
+  const queue = localStorage.getItem(QUEUE_KEY);
+  return queue ? JSON.parse(queue) : [];
+}
+
+function saveOfflineQueue(queue: QueuedOperation[]): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+}
+
+function addToOfflineQueue(operation: Omit<QueuedOperation, 'id' | 'timestamp'>): void {
+  const queue = getOfflineQueue();
+  queue.push({
+    ...operation,
+    id: crypto.randomUUID(),
+    timestamp: Date.now()
+  });
+  saveOfflineQueue(queue);
+}
+
+export async function processSyncQueue(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const queue = getOfflineQueue();
+    if (queue.length === 0) return { success: true };
+
+    for (const op of queue) {
+      try {
+        switch (op.operation) {
+          case 'insert':
+            await supabase.from(op.table).insert(op.payload);
+            break;
+          case 'update':
+            await supabase.from(op.table).update(op.payload).eq('id', op.payload.id);
+            break;
+          case 'delete':
+            await supabase.from(op.table).delete().eq('id', op.payload.id);
+            break;
+        }
+      } catch (error) {
+        console.error(`Erro ao processar operação ${op.operation}:`, error);
+        // Continua processando outras operações mesmo se uma falhar
+      }
+    }
+
+    // Limpa a fila após processamento
+    saveOfflineQueue([]);
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Erro desconhecido';
+    return { success: false, error: message };
+  }
+}
+
 /**
  * Tipo para resposta padronizada das operações CRUD
  */
@@ -84,6 +148,23 @@ export async function insertData<T = any>(table: string, payload: any): Promise<
       };
     }
 
+    const { online } = await checkConnection();
+    
+    if (!online) {
+      // Modo offline: salvar na fila para sincronização posterior
+      addToOfflineQueue({
+        table,
+        operation: 'insert',
+        payload
+      });
+      
+      return {
+        success: true,
+        data: payload as T,
+        message: `Dados salvos localmente e serão sincronizados quando houver conexão`
+      };
+    }
+
     const { data, error } = await supabase.from(table).insert([payload]).select();
     
     if (error) {
@@ -151,6 +232,23 @@ export async function updateData<T = any>(table: string, id: string, payload: an
       };
     }
 
+    const { online } = await checkConnection();
+    
+    if (!online) {
+      // Modo offline: salvar na fila para sincronização posterior
+      addToOfflineQueue({
+        table,
+        operation: 'update',
+        payload: { ...payload, id }
+      });
+      
+      return {
+        success: true,
+        data: { ...payload, id } as T,
+        message: `Dados salvos localmente e serão sincronizados quando houver conexão`
+      };
+    }
+
     const { data, error } = await supabase.from(table).update(payload).eq('id', id).select();
     
     if (error) {
@@ -199,6 +297,21 @@ export async function updateData<T = any>(table: string, id: string, payload: an
  */
 export async function deleteData<T = any>(table: string, id: string): Promise<CrudResponse<T>> {
   try {
+    const { online } = await checkConnection();
+    
+    if (!online) {
+      // Modo offline: salvar na fila para sincronização posterior
+      addToOfflineQueue({
+        table,
+        operation: 'delete',
+        payload: { id }
+      });
+      
+      return {
+        success: true,
+        message: `Operação de exclusão salva localmente e será sincronizada quando houver conexão`
+      };
+    }
     if (!table) {
       return {
         success: false,
@@ -258,15 +371,64 @@ export async function deleteData<T = any>(table: string, id: string): Promise<Cr
 }
 
 /**
- * Verifica se há conexão com o Supabase
- * @returns Objeto indicando sucesso ou falha
+ * Verifica a conectividade com o Supabase e fornece feedback detalhado
+ * @returns Objeto indicando status da conexão e possível erro
  */
 export async function checkConnection(): Promise<{ online: boolean; error?: string }> {
   try {
-    const { error } = await supabase.from('users').select('count', { count: 'exact', head: true });
-    return { online: !error, error: error?.message };
+    // Primeiro verificamos se o navegador tem conexão
+    if (typeof navigator !== 'undefined' && 'onLine' in navigator) {
+      if (!navigator.onLine) {
+        return { 
+          online: false, 
+          error: 'Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.' 
+        };
+      }
+    }
+
+    // Fazemos uma requisição simples ao Supabase
+    // para verificar se a conexão está funcionando
+    const { data, error } = await supabase
+      .rpc('ping')
+      .select('*')
+      .maybeSingle();
+    
+    // Se não houver erro, a conexão está funcionando
+    if (!error) {
+      return { online: true };
+    }
+
+    // Tratamos diferentes tipos de erro para feedback mais preciso
+    switch (error.code) {
+      case 'PGRST116':
+      case '42P01':
+        // Tabela não existe, mas conexão está ok
+        return { online: true };
+      case 'PGRST301':
+      case '401':
+        return { 
+          online: true, 
+          error: 'Problemas de autenticação. Por favor, faça login novamente.' 
+        };
+      case 'PGRST499':
+        return {
+          online: false,
+          error: 'Tempo limite de conexão excedido. Tente novamente.'
+        };
+      default:
+        return { 
+          online: false, 
+          error: `Erro de conexão com o Supabase: ${error.message}` 
+        };
+    }
   } catch (err) {
-    return { online: false, error: err instanceof Error ? err.message : 'Erro desconhecido' };
+    console.error('Erro ao verificar conexão:', err);
+    return { 
+      online: false, 
+      error: err instanceof Error 
+        ? `Erro inesperado: ${err.message}` 
+        : 'Erro desconhecido ao verificar conexão'
+    };
   }
 }
 

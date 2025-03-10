@@ -7,6 +7,13 @@ import { Badge } from '@/app/components/ui/Badge'
 import { Input } from '@/app/components/ui/Input'
 import { Search, Edit, Trash2, Image as ImageIcon } from 'lucide-react'
 
+// Função utilitária para garantir datas válidas
+const getDataValida = (data: string | undefined): Date => {
+  if (!data) return new Date(0)
+  const dataObj = new Date(data)
+  return isNaN(dataObj.getTime()) ? new Date(0) : dataObj
+}
+
 type ListaNotasProps = {
   secaoAtual: 'quem-sou' | 'meus-porques' | 'meus-padroes'
   onSelectNota: (id: string) => void
@@ -24,7 +31,7 @@ export function ListaNotas({ secaoAtual, onSelectNota }: ListaNotasProps) {
     
     return notasFiltradas
       .filter(nota => nota.secao === secaoAtual)
-      .sort((a, b) => new Date(b.dataAtualizacao).getTime() - new Date(a.dataAtualizacao).getTime())
+      .sort((a, b) => getDataValida(b.dataAtualizacao).getTime() - getDataValida(a.dataAtualizacao).getTime())
   }, [notas, secaoAtual, termoBusca, buscarNotas])
   
   // Função para lidar com a exclusão
@@ -37,7 +44,8 @@ export function ListaNotas({ secaoAtual, onSelectNota }: ListaNotasProps) {
   }
   
   // Formatação de data
-  const formatarData = (dataString: string) => {
+  const formatarData = (dataString: string | undefined) => {
+    if (!dataString) return 'Data não disponível'
     const data = new Date(dataString)
     return data.toLocaleDateString('pt-BR', {
       day: '2-digit',
