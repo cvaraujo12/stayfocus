@@ -11,9 +11,11 @@ type Provider = 'github' | 'google';
  */
 export async function signIn(email: string, password: string) {
   try {
+    console.log("Tentando login com", email);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     
     if (error) {
+      console.error("Erro de autenticação:", error);
       return {
         success: false,
         message: error.message,
@@ -22,8 +24,18 @@ export async function signIn(email: string, password: string) {
       };
     }
     
+    console.log("Login bem-sucedido, dados:", {
+      user: data.user ? { id: data.user.id, email: data.user.email } : null,
+      session: data.session ? { 
+        expires_at: data.session.expires_at,
+        has_token: !!data.session.access_token
+      } : null
+    });
+    
     if (data.session) {
+      console.log("Armazenando sessão...");
       await storeSessionSecurely(data.session);
+      console.log("Sessão armazenada com sucesso");
     }
     
     return {
@@ -115,11 +127,13 @@ function getOAuthConfig(provider: Provider, options: Record<string, any> = {}) {
 }
 
 /**
- * Armazena a sessão de forma segura
- * @param session Sessão a ser armazenada
+ * Armazena a sessão do usuário de forma segura
+ * @param session Objeto de sessão do Supabase
+ * @returns Indica se a sessão foi armazenada com sucesso
  */
 async function storeSessionSecurely(session: Session) {
   try {
+    console.log("Iniciando armazenamento seguro da sessão");
     // O Supabase já armazena a sessão em cookies HttpOnly por padrão
     
     if (typeof localStorage !== 'undefined') {
@@ -131,7 +145,11 @@ async function storeSessionSecurely(session: Session) {
         last_sign_in: new Date().toISOString()
       };
       
+      console.log("Salvando metadados de autenticação em localStorage");
       localStorage.setItem('auth_metadata', JSON.stringify(metadata));
+      console.log("Metadados de autenticação salvos com sucesso");
+    } else {
+      console.log("localStorage não disponível neste ambiente");
     }
     
     // Configura refresh automático do token
@@ -140,14 +158,22 @@ async function storeSessionSecurely(session: Session) {
       const now = new Date();
       const timeUntilExpiry = expiresAt.getTime() - now.getTime();
       
+      console.log(`Token expira em ${timeUntilExpiry / (60 * 1000)} minutos`);
+      
       // Agenda refresh 5 minutos antes da expiração
       if (timeUntilExpiry > 5 * 60 * 1000) {
+        console.log("Agendando refresh de token");
         setTimeout(async () => {
           await refreshSession();
         }, timeUntilExpiry - 5 * 60 * 1000);
+      } else {
+        console.log("Token está muito próximo da expiração, não agendando refresh");
       }
+    } else {
+      console.log("Sem data de expiração no token");
     }
     
+    console.log("Armazenamento de sessão concluído com sucesso");
     return true;
   } catch (error) {
     console.error('Erro ao armazenar sessão:', error);

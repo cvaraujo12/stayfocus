@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, signInWithGitHub, signInWithGoogle } from '@/supabase/auth';
 import { LogIn } from 'lucide-react';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,12 +28,16 @@ export default function LoginPage() {
       console.log("Resultado do login:", result);
       
       if (result.success) {
+        // Atualizando explicitamente o contexto de autenticação
+        await refreshUser();
+        
         setMessage('Login realizado com sucesso!');
         console.log("Login bem-sucedido, redirecionando em 1.5 segundos...");
         // Adiciona um pequeno atraso antes do redirecionamento para o usuário ver a mensagem
         setTimeout(() => {
-          console.log("Executando redirecionamento para /");
-          router.push('/');
+          console.log("Executando redirecionamento para / usando window.location");
+          // Substituir router.push por window.location para forçar uma recarga completa
+          window.location.href = '/';
         }, 1500);
       } else {
         setError(result.message);

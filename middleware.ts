@@ -22,11 +22,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
+  // DESATIVADO TEMPORARIAMENTE: Remoção do redirecionamento automático das páginas públicas
+  // para permitir que a navegação normal ocorra após o login
   // Se estiver autenticado e tentar acessar uma rota pública
-  if (session && isPublicRoute) {
-    console.log('Middleware: Redirecionando para / (usuário já autenticado)');
-    return NextResponse.redirect(new URL('/', req.url))
-  }
+  // if (session && isPublicRoute) {
+  //   console.log('Middleware: Redirecionando para / (usuário já autenticado)');
+  //   return NextResponse.redirect(new URL('/', req.url))
+  // }
 
   return res
 }
