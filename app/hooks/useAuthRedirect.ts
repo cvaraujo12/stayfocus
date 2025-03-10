@@ -13,35 +13,35 @@ import { isAuthRoute } from '../lib/auth';
  * - Dashboard: quando autenticado e tentando acessar páginas de auth
  */
 export function useAuthRedirect() {
-  const { session, loading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const redirectedRef = useRef(false);
   
   useEffect(() => {
-    // Não faz nada enquanto estiver carregando
-    if (loading) return;
-    
-    // Evita múltiplos redirecionamentos
+    // Evitar redirecionamentos adicionais
     if (redirectedRef.current) return;
     
-    const isAuth = !!session;
-    const isAuthPath = isAuthRoute(pathname || '');
-    
-    // Se está autenticado mas está em uma rota de auth, redireciona para dashboard
-    if (isAuth && isAuthPath) {
-      redirectedRef.current = true;
-      router.replace('/');
-      return;
+    // Só faz o redirecionamento quando terminamos de verificar o estado de autenticação
+    if (!loading) {
+      const isAuth = !!user;
+      const isAuthPath = isAuthRoute(pathname || '');
+      
+      // Se está autenticado mas está em uma rota de auth, redireciona para dashboard
+      if (isAuth && isAuthPath) {
+        redirectedRef.current = true;
+        router.replace('/dashboard');
+        return;
+      }
+      
+      // Se não está autenticado e não está em uma rota de auth, redireciona para login
+      if (!isAuth && !isAuthPath) {
+        redirectedRef.current = true;
+        router.replace('/login');
+        return;
+      }
     }
-    
-    // Se não está autenticado e não está em uma rota de auth, redireciona para login
-    if (!isAuth && !isAuthPath) {
-      redirectedRef.current = true;
-      router.replace('/login');
-      return;
-    }
-  }, [session, loading, pathname, router]);
+  }, [loading, user, pathname, router]);
   
-  return { session, loading };
+  return { user, loading };
 } 

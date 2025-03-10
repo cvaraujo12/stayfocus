@@ -88,7 +88,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onClose }: SidebarProps) {
-  const { session } = useAuth()
+  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(true)
 
   const toggleSidebar = () => {
@@ -99,7 +99,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   }
 
   const filteredMenuItems = navItems.filter(item => 
-    item.public || (item.requiresAuth && session)
+    item.public || (item.requiresAuth && user)
   )
 
   return (
@@ -139,15 +139,15 @@ export function Sidebar({ onClose }: SidebarProps) {
           </ul>
         </nav>
 
-        {session && (
+        {user && (
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 px-4 py-2">
               <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
-                {session.user.email?.[0].toUpperCase()}
+                {user.email?.[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {session.user.email}
+                  {user.email}
                 </p>
               </div>
             </div>

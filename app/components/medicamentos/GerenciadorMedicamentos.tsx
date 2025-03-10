@@ -3,7 +3,7 @@ import { useAppStore } from '@/app/store';
 import { Plus } from 'lucide-react';
 
 export function GerenciadorMedicamentos() {
-  const { session, loading } = useAuth();
+  const { user, loading } = useAuth();
   const { medicamentos, adicionarMedicamento } = useAppStore();
 
   // Mostra loading enquanto verifica autenticação
@@ -15,21 +15,9 @@ export function GerenciadorMedicamentos() {
     );
   }
 
-  // Redireciona se não estiver autenticado
-  if (!session) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] space-y-4">
-        <p className="text-gray-600 dark:text-gray-400">
-          Você precisa estar logado para gerenciar seus medicamentos
-        </p>
-        <a
-          href="/login"
-          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-        >
-          Fazer Login
-        </a>
-      </div>
-    );
+  // Redireciona se não estiver autenticado e carregamento terminou
+  if (!loading && !user) {
+    return <div>Você precisa estar autenticado para gerenciar medicamentos.</div>
   }
 
   const handleNovoMedicamento = () => {

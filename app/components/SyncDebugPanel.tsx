@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export function SyncDebugPanel() {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const { 
     connectionStatus, 
     lastSyncedAt, 
@@ -98,7 +98,7 @@ export function SyncDebugPanel() {
   };
   
   // Não exibe o painel se não estiver autenticado
-  if (!session) return null;
+  if (!user) return null;
   
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">

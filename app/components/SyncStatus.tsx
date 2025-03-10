@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export function SyncStatus() {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const { connectionStatus, lastSyncedAt, checkConnection, pendingChanges } = useStore(state => ({
     connectionStatus: state.connectionStatus,
     lastSyncedAt: state.lastSyncedAt,
@@ -18,7 +18,7 @@ export function SyncStatus() {
   const [expanded, setExpanded] = useState(false);
   
   useEffect(() => {
-    if (!session || !checkConnection) return;
+    if (!user || !checkConnection) return;
 
     // Verifica a conexão inicialmente
     checkConnection();
@@ -37,7 +37,7 @@ export function SyncStatus() {
       window.removeEventListener('online', () => checkConnection && checkConnection());
       window.removeEventListener('offline', () => checkConnection && checkConnection());
     };
-  }, [checkConnection, session]);
+  }, [checkConnection, user]);
   
   const handleSync = async () => {
     if (checkConnection) {
@@ -62,7 +62,7 @@ export function SyncStatus() {
   };
   
   // Não mostra nada se não estiver autenticado
-  if (!session) return null;
+  if (!user) return null;
   
   return (
     <div 

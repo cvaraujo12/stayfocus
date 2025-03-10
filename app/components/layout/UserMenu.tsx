@@ -4,7 +4,7 @@ import { LogOut, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function UserMenu() {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -12,7 +12,7 @@ export function UserMenu() {
     router.push('/login');
   };
 
-  if (!session) {
+  if (!user) {
     return (
       <a
         href="/login"
@@ -28,10 +28,10 @@ export function UserMenu() {
     <div className="relative group">
       <button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
         <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
-          {session.user.email?.[0].toUpperCase()}
+          {user.email?.[0].toUpperCase()}
         </div>
         <span className="text-sm text-gray-700 dark:text-gray-200">
-          {session.user.email}
+          {user.email}
         </span>
       </button>
 

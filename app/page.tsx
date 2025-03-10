@@ -6,14 +6,18 @@ import { useEffect } from 'react';
 import { PainelLayout } from './components/layout/PainelLayout';
 
 export default function Home() {
-  const { session, loading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   
   useEffect(() => {
-    if (!loading && !session) {
-      router.replace('/login');
+    if (!loading) {
+      if (user) {
+        router.push('/dashboard');
+      } else {
+        router.push('/login');
+      }
     }
-  }, [session, loading, router]);
+  }, [loading, user, router]);
   
   if (loading) {
     return (
@@ -23,7 +27,7 @@ export default function Home() {
     );
   }
   
-  if (!session) {
+  if (!user) {
     return null;
   }
 
