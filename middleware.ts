@@ -6,6 +6,7 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
 
+  // Verificando a sessão
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -22,18 +23,19 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  // DESATIVADO TEMPORARIAMENTE: Remoção do redirecionamento automático das páginas públicas
-  // para permitir que a navegação normal ocorra após o login
+  // TODO: Restaurar este redirecionamento quando o fluxo de login estiver funcionando corretamente
+  // Por enquanto, deixamos comentado para evitar interferir no diagnóstico do problema
   // Se estiver autenticado e tentar acessar uma rota pública
   // if (session && isPublicRoute) {
   //   console.log('Middleware: Redirecionando para / (usuário já autenticado)');
   //   return NextResponse.redirect(new URL('/', req.url))
   // }
 
+  // Permitir a continuação normal da requisição
   return res
 }
 
 // Configurar quais rotas o middleware deve ser executado
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|images).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|images|_vercel).*)'],
 } 

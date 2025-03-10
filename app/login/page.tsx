@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { signIn, signInWithGitHub, signInWithGoogle } from '@/supabase/auth';
 import { LogIn } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { supabase } from '@/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,27 +25,34 @@ export default function LoginPage() {
     setError(null);
     
     try {
-      const result = await signIn(email, password);
-      console.log("Resultado do login:", result);
+      // Método direto usando a API do Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      if (result.success) {
-        // Atualizando explicitamente o contexto de autenticação
-        await refreshUser();
-        
+      console.log("Resposta do Supabase:", { data, error });
+      
+      if (error) {
+        setError(error.message);
+        console.error("Erro de autenticação:", error);
+      } else if (data?.user && data?.session) {
+        // Login bem-sucedido
         setMessage('Login realizado com sucesso!');
-        console.log("Login bem-sucedido, redirecionando em 1.5 segundos...");
-        // Adiciona um pequeno atraso antes do redirecionamento para o usuário ver a mensagem
+        console.log("Login realizado com sucesso, redirecionando...");
+        
+        // Redirecionamento direto
         setTimeout(() => {
-          console.log("Executando redirecionamento para / usando window.location");
-          // Substituir router.push por window.location para forçar uma recarga completa
+          // Método mais direto para navegação
           window.location.href = '/';
         }, 1500);
       } else {
-        setError(result.message);
+        setError('Erro desconhecido ao fazer login. Tente novamente.');
+        console.error("Resposta sem erro mas sem dados de usuário/sessão", data);
       }
     } catch (error) {
       setError('Erro ao fazer login. Tente novamente.');
-      console.error('Erro no login:', error);
+      console.error('Erro ao fazer login:', error);
     } finally {
       setIsLoading(false);
     }
