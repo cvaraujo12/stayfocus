@@ -24,34 +24,29 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+    setMessage('Autenticando...');
+
     try {
-      // Usar a função signIn importada em vez do cliente Supabase diretamente
-      const result = await signIn(email, password);
+      const { success, message } = await signIn(email, password);
       
-      console.log("[LOGIN] Resposta da autenticação:", result);
-      
-      if (!result.success) {
-        setError(result.message);
-        console.error("[LOGIN] Erro de autenticação:", result.message);
-      } else {
-        // Login bem-sucedido
+      if (success) {
         setMessage('Login realizado com sucesso!');
-        console.log("[LOGIN] Login realizado com sucesso, preparando redirecionamento...");
+        await refreshUser(); // Atualiza o estado do usuário
         
-        // Atualizar o estado do usuário
-        await refreshUser();
-        
-        // Adicionar um pequeno delay para garantir que a sessão seja propagada
-        console.log("[LOGIN] Aguardando propagação da sessão antes de redirecionar...");
+        // Pequeno delay para garantir que o estado foi atualizado
         setTimeout(() => {
-          console.log("[LOGIN] Iniciando redirecionamento personalizado...");
           redirectToDashboard();
-        }, 1500);
+        }, 500);
+      } else {
+        setError(message || 'Erro ao realizar login');
+        setEmail('');
+        setPassword('');
       }
-    } catch (error) {
-      setError('Erro ao fazer login. Tente novamente.');
-      console.error('[LOGIN] Erro ao fazer login:', error);
+    } catch (err) {
+      console.error('Erro no login:', err);
+      setError('Ocorreu um erro ao tentar fazer login');
+      setEmail('');
+      setPassword('');
     } finally {
       setIsLoading(false);
     }

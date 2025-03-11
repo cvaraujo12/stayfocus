@@ -46,15 +46,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("[AUTH] Usuário obtido com sucesso:", { id: user.id, email: user.email });
         setUser(user);
         setError(null);
+        
+        // Armazenar dados básicos do usuário no localStorage
+        localStorage.setItem('auth_user_data', JSON.stringify({
+          id: user.id,
+          email: user.email,
+          last_refresh: Date.now()
+        }));
       } else {
         console.log("[AUTH] Falha ao obter usuário:", message);
         setUser(null);
         setError(message || 'Erro ao obter usuário');
+        localStorage.removeItem('auth_user_data');
       }
     } catch (err) {
       console.error('[AUTH] Erro ao obter usuário:', err);
       setUser(null);
       setError('Erro ao carregar usuário');
+      localStorage.removeItem('auth_user_data');
     } finally {
       setLoading(false);
     }
@@ -86,6 +95,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loadUserAndSetupRefresh = async () => {
       console.log("[AUTH] Iniciando carregamento do usuário e configuração de refresh...");
       
+      // Tentar recuperar dados do usuário do localStorage
+      try {
+        const storedUserData = localStorage.getItem('auth_user_data');
+        if (storedUserData) {
+          const { last_refresh } = JSON.parse(storedUserData);
+          const timeSinceLastRefresh = Date.now() - last_refresh;
+          
+          // Se os dados foram atualizados nos últimos 5 minutos, usar cache
+          if (timeSinceLastRefresh < 5 * 60 * 1000) {
+            console.log("[AUTH] Usando dados em cache do usuário");
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("[AUTH] Erro ao ler cache:", error);
+      }
+      
       // Carregar usuário atual
       await refreshUser();
       
@@ -104,9 +131,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log("[AUTH] Usuário conectado:", { id: session.user.id, email: session.user.email });
             setUser(session.user);
             setError(null);
+            
+            // Atualizar cache
+            localStorage.setItem('auth_user_data', JSON.stringify({
+              id: session.user.id,
+              email: session.user.email,
+              last_refresh: Date.now()
+            }));
           } else if (event === 'SIGNED_OUT') {
             console.log("[AUTH] Usuário desconectado");
             setUser(null);
+            localStorage.removeItem('auth_user_data');
           } else if (event === 'USER_UPDATED' && session) {
             console.log("[AUTH] Usuário atualizado:", { id: session.user.id });
             setUser(session.user);
@@ -128,6 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cleanupRef.current) {
           cleanupRef.current();
         }
+        localStorage.removeItem('auth_user_data');
       };
     };
     
