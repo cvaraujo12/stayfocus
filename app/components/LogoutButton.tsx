@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../providers/AuthProvider';
 
 export default function LogoutButton() {
   const { logout, loading: authLoading } = useAuth();
@@ -9,10 +9,11 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     try {
+      console.log("[LOGOUT] Iniciando processo de logout...");
       setLoading(true);
       await logout();
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('[LOGOUT] Erro ao fazer logout:', error);
     } finally {
       setLoading(false);
     }

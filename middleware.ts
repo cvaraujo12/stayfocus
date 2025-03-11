@@ -11,25 +11,40 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+  const hasSession = !!session;
+  
   // Rotas públicas que não requerem autenticação
   const publicRoutes = ['/login', '/signup', '/recuperar-senha']
   const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route))
+  const isHomeRoute = req.nextUrl.pathname === '/'
 
-  console.log(`Middleware: URL=${req.nextUrl.pathname}, Sessão=${!!session}, Rota pública=${isPublicRoute}`);
+  console.log(`[MIDDLEWARE] URL=${req.nextUrl.pathname}, Sessão=${hasSession}, Rota pública=${isPublicRoute}, Home=${isHomeRoute}`);
+  
+  if (session) {
+    console.log(`[MIDDLEWARE] Usuário autenticado (ID: ${session.user.id.slice(0, 8)}...)`);
+    
+    // Verificar se a sessão tem um token válido
+    if (session.access_token) {
+      console.log(`[MIDDLEWARE] Token de acesso presente e válido`);
+    } else {
+      console.log(`[MIDDLEWARE] Alerta: Token de acesso ausente ou inválido`);
+    }
+  }
 
   // Se não estiver autenticado e tentar acessar uma rota protegida
-  if (!session && !isPublicRoute) {
-    console.log('Middleware: Redirecionando para /login (usuário não autenticado)');
+  if (!hasSession && !isPublicRoute) {
+    console.log('[MIDDLEWARE] Redirecionando para /login (usuário não autenticado)');
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
   // Se estiver autenticado e tentar acessar uma rota pública
-  if (session && isPublicRoute) {
-    console.log('Middleware: Redirecionando para / (usuário já autenticado)');
+  if (hasSession && isPublicRoute) {
+    console.log('[MIDDLEWARE] Redirecionando para / (usuário já autenticado)');
     return NextResponse.redirect(new URL('/', req.url))
   }
 
   // Permitir a continuação normal da requisição
+  console.log(`[MIDDLEWARE] Permitindo acesso à rota solicitada: ${req.nextUrl.pathname}`);
   return res
 }
 

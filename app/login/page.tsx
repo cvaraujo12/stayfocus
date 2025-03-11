@@ -7,6 +7,7 @@ import { signIn, signInWithGitHub, signInWithGoogle } from '@/supabase/auth';
 import { LogIn } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/supabase/client';
+import { redirectToDashboard } from './redirect';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,23 +29,29 @@ export default function LoginPage() {
       // Usar a função signIn importada em vez do cliente Supabase diretamente
       const result = await signIn(email, password);
       
-      console.log("Resposta da autenticação:", result);
+      console.log("[LOGIN] Resposta da autenticação:", result);
       
       if (!result.success) {
         setError(result.message);
-        console.error("Erro de autenticação:", result.message);
+        console.error("[LOGIN] Erro de autenticação:", result.message);
       } else {
         // Login bem-sucedido
         setMessage('Login realizado com sucesso!');
-        console.log("Login realizado com sucesso, redirecionando...");
+        console.log("[LOGIN] Login realizado com sucesso, preparando redirecionamento...");
         
-        // Atualizar o estado do usuário e redirecionar usando o router do Next.js
+        // Atualizar o estado do usuário
         await refreshUser();
-        router.push('/');
+        
+        // Adicionar um pequeno delay para garantir que a sessão seja propagada
+        console.log("[LOGIN] Aguardando propagação da sessão antes de redirecionar...");
+        setTimeout(() => {
+          console.log("[LOGIN] Iniciando redirecionamento personalizado...");
+          redirectToDashboard();
+        }, 1500);
       }
     } catch (error) {
       setError('Erro ao fazer login. Tente novamente.');
-      console.error('Erro ao fazer login:', error);
+      console.error('[LOGIN] Erro ao fazer login:', error);
     } finally {
       setIsLoading(false);
     }

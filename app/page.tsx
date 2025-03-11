@@ -2,33 +2,77 @@
 
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { PainelLayout } from './components/layout/PainelLayout';
+import { wasRecentlyRedirected } from './login/redirect';
 
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [recentRedirect, setRecentRedirect] = useState<boolean | null>(null);
+  
+  // Verificar se houve redirecionamento recente
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const wasRedirected = wasRecentlyRedirected();
+      setRecentRedirect(wasRedirected);
+      console.log("[HOME] Verificação de redirecionamento recente:", wasRedirected);
+    }
+  }, []);
   
   useEffect(() => {
-    console.log("Estado de autenticação na página inicial:", { user, loading });
+    console.log("[HOME] Estado de autenticação na página inicial:", { 
+      userExists: !!user, 
+      userId: user?.id, 
+      loading,
+      userEmail: user?.email,
+      recentRedirect
+    });
+    
     if (!loading && !user) {
-      console.log("Usuário não autenticado, redirecionando para /login");
-      router.push('/login');
+      // Se não houve redirecionamento recente, redirecionar para login
+      if (!recentRedirect) {
+        console.log("[HOME] Usuário não autenticado, redirecionando para /login");
+        window.location.href = '/login';
+      } else {
+        console.log("[HOME] Detectado possível loop de redirecionamento, aguardando...");
+        // Limpar flag de redirecionamento recente para evitar loop
+        sessionStorage.removeItem('auth_redirect');
+      }
     } else if (!loading && user) {
-      console.log("Usuário autenticado:", user);
+      console.log("[HOME] Usuário autenticado:", { 
+        id: user.id, 
+        email: user.email 
+      });
+      // Limpar flag de redirecionamento ao carregar página com usuário válido
+      sessionStorage.removeItem('auth_redirect');
     }
-  }, [loading, user, router]);
+  }, [loading, user, router, recentRedirect]);
   
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Carregando seu painel...</p>
+        </div>
       </div>
     );
   }
   
   if (!user) {
-    return null;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400">Verificando autenticação...</p>
+          {recentRedirect && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+              Aguarde enquanto verificamos seus dados de acesso...
+            </p>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
