@@ -3,6 +3,8 @@ import { useAutoconhecimentoStore } from '@/app/stores/autoconhecimentoStore'
 import { useRegistroEstudosStore } from '@/app/stores/registroEstudosStore'
 import { useSonoStore } from '@/app/stores/sonoStore'
 import { useMedicamentosStore } from '@/app/stores/medicamentosStore'
+import { processOfflineQueue, reconcileData } from '@/app/services/syncService'
+import { checkConnection } from '@/supabase/utils'
 
 /**
  * Configura o intervalo de sincronização automática em ms
@@ -11,6 +13,7 @@ import { useMedicamentosStore } from '@/app/stores/medicamentosStore'
 const SYNC_INTERVAL = 5 * 60 * 1000 // 5 minutos em ms
 
 let syncInterval: NodeJS.Timeout | null = null
+let isProcessingSync = false
 
 /**
  * Carregar todos os dados necessários do backend
@@ -52,32 +55,92 @@ export async function carregarDadosIniciais(userId: string): Promise<void> {
  * Esta função pode ser chamada quando o usuário está online após um período offline
  */
 export async function sincronizarTudo(userId: string): Promise<void> {
+  // Evitar sincronizações simultâneas
+  if (isProcessingSync) {
+    console.log('Sincronização já em andamento, ignorando solicitação')
+    return
+  }
+  
+  isProcessingSync = true
+  
   try {
     console.log('Sincronizando todos os dados para usuário:', userId)
     
-    // Sincronizar prioridades
+    // Verificar conexão
+    const { online } = await checkConnection()
+    if (!online) {
+      console.log('Dispositivo offline, sincronização adiada')
+      isProcessingSync = false
+      return
+    }
+    
+    // Processar fila de operações offline
+    const queueResult = await processOfflineQueue()
+    console.log('Resultado do processamento da fila offline:', queueResult)
+    
+    // Sincronizar prioridades com reconciliação
     const prioridadesStore = usePrioridadesStore.getState()
+    const prioridadesLocais = prioridadesStore.prioridades
+    const prioridadesResult = await reconcileData('prioridades', prioridadesLocais, {
+      filter: { user_id: userId },
+      conflictStrategy: 'timestamp'
+    })
+    console.log('Reconciliação de prioridades:', prioridadesResult)
     await prioridadesStore.sincronizar(userId)
     
-    // Sincronizar notas de autoconhecimento
+    // Sincronizar notas de autoconhecimento com reconciliação
     const autoconhecimentoStore = useAutoconhecimentoStore.getState()
+    const notasLocais = autoconhecimentoStore.notas
+    const notasResult = await reconcileData('self_knowledge_notes', notasLocais, {
+      filter: { user_id: userId },
+      conflictStrategy: 'timestamp'
+    })
+    console.log('Reconciliação de notas:', notasResult)
     await autoconhecimentoStore.sincronizar(userId)
     
-    // Sincronizar sessões de estudo
+    // Sincronizar sessões de estudo com reconciliação
     const registroEstudosStore = useRegistroEstudosStore.getState()
+    const sessoesLocais = registroEstudosStore.sessoes
+    const sessoesResult = await reconcileData('study_sessions', sessoesLocais, {
+      filter: { user_id: userId },
+      conflictStrategy: 'timestamp'
+    })
+    console.log('Reconciliação de sessões de estudo:', sessoesResult)
     await registroEstudosStore.sincronizar(userId)
     
-    // Sincronizar registros de sono
+    // Sincronizar registros de sono com reconciliação
     const sonoStore = useSonoStore.getState()
+    const registrosSonoLocais = sonoStore.registros
+    const sonoResult = await reconcileData('sleep_records', registrosSonoLocais, {
+      filter: { user_id: userId },
+      conflictStrategy: 'timestamp'
+    })
+    console.log('Reconciliação de registros de sono:', sonoResult)
     await sonoStore.sincronizar(userId)
     
-    // Sincronizar medicamentos e registros
+    // Sincronizar medicamentos e registros com reconciliação
     const medicamentosStore = useMedicamentosStore.getState()
+    const medicamentosLocais = medicamentosStore.medicamentos
+    const medicamentosResult = await reconcileData('medicamentos', medicamentosLocais, {
+      filter: { user_id: userId },
+      conflictStrategy: 'timestamp'
+    })
+    console.log('Reconciliação de medicamentos:', medicamentosResult)
+    
+    const registrosMedicamentosLocais = medicamentosStore.registros
+    const registrosMedicamentosResult = await reconcileData('registros_medicamentos', registrosMedicamentosLocais, {
+      filter: { user_id: userId },
+      conflictStrategy: 'timestamp'
+    })
+    console.log('Reconciliação de registros de medicamentos:', registrosMedicamentosResult)
+    
     await medicamentosStore.sincronizarTudo(userId)
     
     console.log('Todos os dados sincronizados com sucesso')
   } catch (error) {
     console.error('Erro ao sincronizar todos os dados:', error)
+  } finally {
+    isProcessingSync = false
   }
 }
 

@@ -25,30 +25,22 @@ export default function LoginPage() {
     setError(null);
     
     try {
-      // Método direto usando a API do Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      // Usar a função signIn importada em vez do cliente Supabase diretamente
+      const result = await signIn(email, password);
       
-      console.log("Resposta do Supabase:", { data, error });
+      console.log("Resposta da autenticação:", result);
       
-      if (error) {
-        setError(error.message);
-        console.error("Erro de autenticação:", error);
-      } else if (data?.user && data?.session) {
+      if (!result.success) {
+        setError(result.message);
+        console.error("Erro de autenticação:", result.message);
+      } else {
         // Login bem-sucedido
         setMessage('Login realizado com sucesso!');
         console.log("Login realizado com sucesso, redirecionando...");
         
-        // Redirecionamento direto
-        setTimeout(() => {
-          // Método mais direto para navegação
-          window.location.href = '/';
-        }, 1500);
-      } else {
-        setError('Erro desconhecido ao fazer login. Tente novamente.');
-        console.error("Resposta sem erro mas sem dados de usuário/sessão", data);
+        // Atualizar o estado do usuário e redirecionar usando o router do Next.js
+        await refreshUser();
+        router.push('/');
       }
     } catch (error) {
       setError('Erro ao fazer login. Tente novamente.');

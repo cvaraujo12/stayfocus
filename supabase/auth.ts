@@ -446,6 +446,64 @@ export async function updateUserData(userData: { [key: string]: any }) {
   return data;
 }
 
+/**
+ * Configura o refresh automático do token de autenticação
+ * para manter a sessão ativa por mais tempo
+ * 
+ * @returns Função para limpar o intervalo de verificação
+ */
+export async function setupSessionRefresh(): Promise<() => void> {
+  console.log('Configurando refresh automático de sessão');
+  
+  const { data } = await supabase.auth.getSession();
+  
+  if (data.session) {
+    // Configurar listener para mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(`Evento de autenticação: ${event}`);
+      
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token atualizado automaticamente');
+        if (session) {
+          storeSessionSecurely(session);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        console.log('Usuário desconectado');
+      }
+    });
+    
+    // Verificar expiração do token a cada hora
+    const checkInterval = setInterval(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const expiresAt = new Date(session.expires_at * 1000);
+        const now = new Date();
+        
+        // Se estiver a menos de 30 minutos da expiração, forçar refresh
+        if (expiresAt.getTime() - now.getTime() < 30 * 60 * 1000) {
+          console.log('Token próximo da expiração, iniciando refresh');
+          const { data, error } = await supabase.auth.refreshSession();
+          
+          if (error) {
+            console.error('Erro ao atualizar sessão:', error);
+          } else {
+            console.log('Sessão atualizada com sucesso');
+          }
+        }
+      }
+    }, 60 * 60 * 1000); // 1 hora
+    
+    // Retornar função para limpar os eventos
+    return () => {
+      clearInterval(checkInterval);
+      subscription.unsubscribe();
+    };
+  }
+  
+  // Se não houver sessão, retornar função vazia
+  return () => {};
+}
+
 export default {
   signIn,
   signOut,
@@ -454,5 +512,6 @@ export default {
   signUp,
   getCurrentUser,
   getSession,
-  updateUserData
+  updateUserData,
+  setupSessionRefresh
 }; 

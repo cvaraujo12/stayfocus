@@ -1,11 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Configuração das credenciais do Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gtqnhweevlyzfigtzxml.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0cW5od2Vldmx5emZpZ3R6eG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzMjE4NzQsImV4cCI6MjA1Njg5Nzg3NH0.W30elhoaD3vgrw_-S77-3g_UmwY_LfFa7OlUYJ9VX5k';
+// Verificação das variáveis de ambiente
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Criação do cliente Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Verificação de segurança para garantir que as variáveis de ambiente estão configuradas
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Erro: As variáveis de ambiente NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY são obrigatórias.');
+  
+  if (typeof window !== 'undefined') {
+    // Apenas mostra alerta no navegador, não no servidor
+    alert('Erro de configuração: Entre em contato com o suporte.');
+  }
+}
+
+// Configurações para o cliente Supabase com opções atualizadas
+const supabaseOptions = {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  realtime: {
+    // Configurações de realtime
+  },
+  global: {
+    // Configurações globais
+  },
+  // Usa a opção storage em vez das opções depreciadas
+  storage: {
+    // Usando localStorage para armazenar sessões no cliente
+    // Esta opção substitui getStorage, serialize e deserialize
+  }
+};
+
+// Criação do cliente Supabase com as novas opções
+export const supabase = createClient(
+  supabaseUrl || '', 
+  supabaseAnonKey || '',
+  supabaseOptions
+);
 
 // Função para testar a conexão com o Supabase
 export async function testSupabaseConnection() {

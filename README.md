@@ -1,112 +1,89 @@
-# Painel de Produtividade para Neurodivergentes
+# StayFocus
 
-Este projeto implementa um painel de produtividade focado em pessoas neurodivergentes, especialmente com TDAH, seguindo princípios de simplicidade, foco e redução de sobrecarga cognitiva.
+Aplicação para ajudar pessoas neurodivergentes a gerenciar tarefas, tempo e bem-estar.
+
+## Visão Geral
+
+O StayFocus é uma aplicação web desenvolvida com Next.js e Supabase, projetada para atender às necessidades específicas de pessoas neurodivergentes. A aplicação oferece ferramentas para gestão de tempo, foco, estudos, alimentação, sono e gerenciamento financeiro de forma simplificada e acessível.
 
 ## Estrutura do Projeto
 
-O projeto segue uma estrutura clara e previsível usando Next.js com App Router:
-
 ```
-/app
-  /[seção]
-    /page.tsx      # Página principal de cada seção
-    /components    # Componentes específicos da seção
-  /components      # Componentes compartilhados
-  /hooks           # Hooks personalizados
-  /lib             # Utilitários e configurações
-  /store           # Gerenciamento de estado com Zustand
-  /styles          # Estilos globais
-  /types           # Definições de tipos TypeScript
-/supabase          # Configuração e utilitários do Supabase
-  /client.ts       # Cliente Supabase
-  /auth.ts         # Funções de autenticação
-  /utils.ts        # Funções CRUD genéricas
-  /index.ts        # Exportações centralizadas
-  /migrations      # Scripts SQL para criação de tabelas
-/scripts           # Scripts utilitários
+stayfocus/
+├── app/                # Diretório principal da aplicação Next.js
+│   ├── components/     # Componentes reutilizáveis
+│   ├── contexts/       # Contextos React (legado - em migração)
+│   ├── hooks/          # Hooks personalizados
+│   ├── providers/      # Provedores de contexto (atual)
+│   ├── services/       # Serviços e lógica de negócios
+│   ├── store/          # Gerenciamento de estado global (legado - em migração)
+│   └── stores/         # Stores individuais (legado - em migração)
+├── src/
+│   └── stores/         # Novo local centralizado para stores
+├── supabase/           # Configuração e funções de acesso ao Supabase
+├── __tests__/          # Testes da aplicação
+└── public/             # Arquivos estáticos
 ```
 
-## Princípios de Desenvolvimento
+## Alterações Recentes
 
-- **Simplicidade Acima de Tudo**: Menos é mais
-- **Foco no Essencial**: Apenas funcionalidades que agregam valor imediato
-- **Redução de Sobrecarga Cognitiva**: Interfaces claras e previsíveis
-- **Estímulos Visuais Adequados**: Uso estratégico de cores e ícones
-- **Lembretes e Estrutura**: Apoio para funções executivas
+Consulte o arquivo [CHANGELOG.md](./CHANGELOG.md) para ver o histórico completo de alterações.
 
-## Tecnologias
+### Melhorias na Autenticação
 
-- **Framework**: Next.js (App Router)
-- **Estilização**: Tailwind CSS
-- **Componentes**: Headless UI
-- **Ícones**: Lucide ou Phosphor Icons
-- **Gerenciamento de Estado**: Zustand com persistência local
-- **Backend**: Supabase (Autenticação, Banco de Dados, Armazenamento)
+- Corrigido o fluxo de redirecionamento após login
+- Unificado o método de login na página de login
+- Implementado armazenamento adequado de sessão
 
-## Instalação
+### Melhorias de Estrutura
 
-```bash
-# Instalar dependências
-npm install
+- Unificado o provedor de autenticação
+- Criado serviço centralizado para comunicação com Supabase
+- Iniciada a unificação das stores com padrão de migração gradual
+- Movidos arquivos de teste para diretório dedicado
 
-# Configurar variáveis de ambiente
-# Crie um arquivo .env.local na raiz do projeto com as seguintes variáveis:
-# NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima_do_supabase
-# SUPABASE_SERVICE_ROLE_KEY=sua_chave_de_servico_do_supabase
+## Desenvolvimento
 
-# Iniciar servidor de desenvolvimento
-npm run dev
-```
+### Pré-requisitos
 
-## Configuração do Supabase
+- Node.js 18.x ou superior
+- npm ou yarn
+- Conta no Supabase
 
-O projeto utiliza o Supabase como backend. Para testar a conexão com o Supabase:
+### Configuração do Ambiente
 
-```bash
-# Testar conexão com o Supabase
-node supabase/test-connection.js
-```
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/stayfocus.git
+   cd stayfocus
+   ```
 
-### Criação das Tabelas no Supabase
+2. Instale as dependências:
+   ```bash
+   npm install
+   # ou
+   yarn
+   ```
 
-Para criar as tabelas necessárias no Supabase, siga as instruções no arquivo `supabase/migrations/README.md`. Em resumo:
+3. Configure as variáveis de ambiente:
+   Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase
+   SUPABASE_SERVICE_ROLE_KEY=sua_chave_de_servico_do_supabase
+   ```
 
-1. Acesse o painel de administração do Supabase
-2. Vá para o SQL Editor
-3. Copie e cole o conteúdo do arquivo `supabase/migrations/create_tables_direct.sql`
-4. Execute o script SQL
+4. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   # ou
+   yarn dev
+   ```
 
-### Estrutura do Banco de Dados
+## Roadmap
 
-O projeto utiliza as seguintes tabelas no Supabase:
+Consulte o arquivo [ROADMAP.md](./ROADMAP.md) para ver o plano detalhado de desenvolvimento.
 
-1. `users`: Informações básicas do usuário
-2. `priorities`: Tarefas e prioridades diárias
-3. `notes`: Notas de autoconhecimento
-4. `sessions`: Sessões de estudo registradas
-5. `medications`: Rastreamento de medicação
-6. `moods`: Registros de humor
-7. `expenses`: Gastos financeiros categorizados
-8. `projects`: Projetos e hiperfocos
-9. `sleep_logs`: Registros de sono
+## Licença
 
-Todas as tabelas implementam Row Level Security (RLS) para garantir que os usuários só possam acessar seus próprios dados.
-
-### Funcionalidades do Supabase Implementadas
-
-- **Autenticação**: Login/registro com email/senha, GitHub e Google
-- **Banco de Dados**: Operações CRUD para todas as seções do aplicativo
-- **Sincronização Offline**: Fallback para localStorage quando offline
-- **Segurança**: Row Level Security (RLS) em todas as tabelas
-
-## Seções do Aplicativo
-
-1. **Início**: Dashboard com visão geral e lembretes
-2. **Alimentação**: Controle e planejamento de refeições
-3. **Estudos**: Organização e técnicas de aprendizado
-4. **Saúde**: Monitoramento de bem-estar e medicações
-5. **Lazer**: Atividades recreativas e descanso
-6. **Finanças**: Controle de gastos e orçamento
-7. **Sono**: Monitoramento de padrões de sono
-8. **Projetos**: Gerenciamento de projetos e hiperfocos
+Este projeto está licenciado sob a licença MIT.
